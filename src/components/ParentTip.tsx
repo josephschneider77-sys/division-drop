@@ -6,15 +6,23 @@ export default function ParentTip({ onDismiss }: Props) {
   return (
     <div className="modal-backdrop" role="dialog" aria-modal="true">
       <div className="modal tip-modal">
-        <h2>Install on a phone or tablet</h2>
+        <h2>Add Division Drop to your home screen</h2>
         <p>
-          Division Drop works great as an app on Android. In Chrome, tap{' '}
-          <strong>⋮</strong> → <strong>Add to Home screen</strong> or{' '}
-          <strong>Install app</strong>.
+          Open this link in the phone or tablet browser, then install it like an
+          app (no App Store / Play Store needed).
         </p>
         <ul>
+          <li>
+            <strong>Android (Chrome):</strong> tap <strong>⋮</strong> →{' '}
+            <strong>Install app</strong> or <strong>Add to Home screen</strong>
+          </li>
+          <li>
+            <strong>iPhone / iPad (Safari):</strong> tap Share{' '}
+            <strong>□↑</strong> → <strong>Add to Home Screen</strong> →{' '}
+            <strong>Add</strong>
+          </li>
           <li>Portrait mode is best</li>
-          <li>Big ◀ ↻ ▶ buttons; tap a pulsing piece to divide</li>
+          <li>Tap a glowing ÷ brick to solve and power-clear</li>
           <li>Math is optional — she can just stack if she wants</li>
         </ul>
         <button type="button" className="primary-btn" onClick={onDismiss}>
