@@ -26,8 +26,8 @@ const BRICK_D = 0.95
 const RAIL_W = 0.38
 const RAIL_D = 1.35
 const FLOOR_H = 0.32
-/** Extra pad in camera framing (world units, applied via content AABB). */
-const FRAME_MARGIN = 0.1
+/** Extra pad in camera framing — keep tight so playfield fills the canvas. */
+const FRAME_MARGIN = 0.04
 
 function cellPos(x: number, y: number): [number, number, number] {
   return [
@@ -167,8 +167,9 @@ function MathGlyph() {
 }
 
 /**
- * Orthographic isometric-ish camera that still frames the full grid
- * (plus side rails) on any canvas aspect — phone/tablet safe.
+ * Mild orthographic 3D camera — mostly face-on so the tall stack reads
+ * clearly, with a light elevation + side offset so brick tops/sides and
+ * left/right rails still show. Frames the full grid on any aspect.
  */
 function ResponsiveIsoCamera() {
   const { camera, size } = useThree()
@@ -181,13 +182,12 @@ function ResponsiveIsoCamera() {
     const h = Math.max(1, size.height)
     const aspect = w / h
 
-    // Strong isometric-ish: elevated and offset so top + side faces read
-    // on every brick. Not a dead-on front view; not a full 45° game-iso
-    // that would crush the tall Tetris stack on phones.
+    // Dialed-back iso: mostly front, slight yaw/pitch for 3D depth.
+    // Steep game-iso crushed the board; dead-flat hid brick sides.
     const dist = 36
-    cam.position.set(dist * 0.55, dist * 0.42, dist * 0.78)
+    cam.position.set(dist * 0.22, dist * 0.16, dist * 0.96)
     cam.up.set(0, 1, 0)
-    cam.lookAt(0, -0.35, 0)
+    cam.lookAt(0, -0.1, 0)
     cam.updateMatrixWorld(true)
 
     // AABB of playfield + left/right rails + floor + brick depth
@@ -419,11 +419,11 @@ function Scene({ view, slowMo }: { view: ViewCell[][]; slowMo?: boolean }) {
       <color attach="background" args={['#16083a']} />
       <ambientLight intensity={0.42} />
       <hemisphereLight args={['#e8dcff', '#1a0a3e', 0.55]} />
-      {/* Key light from iso-friendly upper-right so faces get distinct shading */}
+      {/* Key light slightly off-axis so top + side faces still separate */}
       <directionalLight
         castShadow
-        position={[10, 16, 12]}
-        intensity={1.35}
+        position={[6, 12, 14]}
+        intensity={1.25}
         shadow-mapSize={[1024, 1024]}
         shadow-camera-near={1}
         shadow-camera-far={50}

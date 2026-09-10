@@ -19,9 +19,10 @@ export default function HUD({ stats, progress, next, onPause, onMute }: Props) {
       <div className="hud-block">
         <span className="label">Score</span>
         <strong>{stats.score}</strong>
+        <span className="hud-best">Best {progress.highScore}</span>
       </div>
       <div className="hud-block">
-        <span className="label">Level</span>
+        <span className="label">Lvl</span>
         <strong>{stats.level}</strong>
       </div>
       <div className="hud-block next-block">
@@ -29,8 +30,8 @@ export default function HUD({ stats, progress, next, onPause, onMute }: Props) {
         <div
           className="mini-piece"
           style={{
-            gridTemplateColumns: `repeat(${maxX + 1}, 10px)`,
-            gridTemplateRows: `repeat(${maxY + 1}, 10px)`,
+            gridTemplateColumns: `repeat(${maxX + 1}, 8px)`,
+            gridTemplateRows: `repeat(${maxY + 1}, 8px)`,
           }}
         >
           {Array.from({ length: (maxY + 1) * (maxX + 1) }).map((_, i) => {
@@ -59,9 +60,6 @@ export default function HUD({ stats, progress, next, onPause, onMute }: Props) {
         <button type="button" className="icon-btn" onClick={onPause} aria-label="Pause">
           ⏸
         </button>
-      </div>
-      <div className="hud-meta">
-        <span>Best {progress.highScore}</span>
       </div>
     </header>
   )

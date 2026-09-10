@@ -33,7 +33,7 @@ v1 uses **3 multiple-choice** answers (fat-finger friendly) plus an optional on-
 
 ## Look & feel
 
-Playfield is a **Three.js / react-three-fiber** orthographic isometric stack: beveled bricks with distinct lit faces, slim left/right side boards marking the move edges, and a responsive camera that frames the full grid on phone/tablet.
+Playfield is a **Three.js / react-three-fiber** mild orthographic 3D stack: beveled bricks with distinct lit faces, slim left/right side boards marking the move edges, and a responsive mostly face-on camera that zooms the board to fill the screen on phone/tablet. Compact HUD and controls keep the play area dominant.
 
 ## Develop
 

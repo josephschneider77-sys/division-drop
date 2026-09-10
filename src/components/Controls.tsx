@@ -21,7 +21,7 @@ export default function Controls({
 }: Props) {
   return (
     <div className={`controls ${disabled ? 'disabled' : ''}`}>
-      <div className="control-row">
+      <div className="control-row main-row">
         <button type="button" className="ctrl" onClick={onLeft} aria-label="Left">
           ◀
         </button>
@@ -31,8 +31,6 @@ export default function Controls({
         <button type="button" className="ctrl" onClick={onRight} aria-label="Right">
           ▶
         </button>
-      </div>
-      <div className="control-row drop-row">
         <button type="button" className="ctrl" onClick={onSoftDrop} aria-label="Soft drop">
           ▼
         </button>
