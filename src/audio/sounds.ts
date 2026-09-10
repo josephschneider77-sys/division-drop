@@ -58,9 +58,11 @@ function playUrl(file: string, volume: number): void {
   })
 }
 
-/** Glowing ÷ brick appeared — "ooh, power-up!" */
+/** Glowing ÷ brick appeared — literal spoken "divide". */
 export function playDivOpportunity(): void {
-  playUrl('div-opportunity.mp3', 0.85)
+  playUrl('divide.mp3', 1)
+  // Soft sparkle under the word so it still feels like a power-up.
+  window.setTimeout(() => playUrl('div-opportunity.mp3', 0.3), 60)
 }
 
 /** Successful ÷ bust / power-clear — big reward. */
