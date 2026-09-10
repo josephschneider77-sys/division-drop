@@ -2,6 +2,18 @@
 
 const BASE = `${import.meta.env.BASE_URL}sounds/`
 
+/** Joe's recorded divide / division-opportunity lines. */
+const DIVIDE_VO = [
+  'vo/divide-1.mp3',
+  'vo/divide-2.mp3',
+  'vo/divide-3.mp3',
+  'vo/divide-4.mp3',
+  'vo/divide-5.mp3',
+  'vo/divide-6.mp3',
+] as const
+
+let lastVo = -1
+
 let muted = false
 let unlocked = false
 let ctx: AudioContext | null = null
@@ -58,11 +70,18 @@ function playUrl(file: string, volume: number): void {
   })
 }
 
-/** Glowing ÷ brick appeared — literal spoken "divide". */
+/** Glowing ÷ brick appeared — random VO line from Joe. */
 export function playDivOpportunity(): void {
-  playUrl('divide.mp3', 1)
-  // Soft sparkle under the word so it still feels like a power-up.
-  window.setTimeout(() => playUrl('div-opportunity.mp3', 0.3), 60)
+  if (!DIVIDE_VO.length) return
+  let idx = Math.floor(Math.random() * DIVIDE_VO.length)
+  // Avoid immediate repeat when possible.
+  if (DIVIDE_VO.length > 1 && idx === lastVo) {
+    idx = (idx + 1) % DIVIDE_VO.length
+  }
+  lastVo = idx
+  playUrl(DIVIDE_VO[idx], 1)
+  // Soft sparkle under the voice.
+  window.setTimeout(() => playUrl('div-opportunity.mp3', 0.28), 80)
 }
 
 /** Successful ÷ bust / power-clear — big reward. */
