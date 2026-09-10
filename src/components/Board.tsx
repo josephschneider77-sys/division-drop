@@ -3,16 +3,18 @@ import { RoundedBox } from '@react-three/drei'
 import { useEffect, useLayoutEffect, useMemo, useRef, type ReactNode } from 'react'
 import * as THREE from 'three'
 import { COLOR_HEX, COLS, ROWS } from '../game/constants'
-import { mergeGhost } from '../game/board'
-import type { CharmTheme } from '../game/themes'
+import { mergeGhost, type ClusterCell } from '../game/board'
+import { THEME_EMOJI, type CharmTheme } from '../game/themes'
 import type { Cell, Piece } from '../game/types'
-import { CharmVisual } from './Charms'
+import type { BustExplosion } from '../hooks/useGame'
+import { CharmVisual, EmojiChunk } from './Charms'
 
 interface Props {
   board: Cell[][]
   piece: Piece | null
   shake?: boolean
   slowMo?: boolean
+  explosion?: BustExplosion | null
 }
 
 type ViewCell = Cell & { ghost?: boolean; active?: boolean }
@@ -63,13 +65,14 @@ function Brick({
   const ring = useRef<THREE.MeshStandardMaterial>(null)
   const base = useMemo(() => new THREE.Color(COLOR_HEX[color]), [color])
   const charm = theme ?? 'crystal'
+  // Live ÷ interaction only on the active falling math piece — never locked stack.
+  const mathLive = !!(hasMath && active && !ghost)
 
   useFrame(({ clock }) => {
     if (!group.current) return
     const t = clock.getElapsedTime()
-    // Strong pulse on math-enabled pieces so they read as tappable.
     let s = active ? 0.96 : 1
-    if (hasMath && !ghost) s *= 1 + Math.sin(t * 5.2) * 0.12
+    if (mathLive) s *= 1 + Math.sin(t * 5.2) * 0.12
     if (burst) s *= 1 + Math.sin(t * 18) * 0.1
     group.current.scale.setScalar(s)
     if (active && !ghost) {
@@ -80,14 +83,14 @@ function Brick({
     if (glow.current) {
       glow.current.emissiveIntensity = burst
         ? 0.7 + Math.sin(t * 14) * 0.3
-        : hasMath && !ghost
+        : mathLive
           ? 0.45 + Math.sin(t * 5.2) * 0.35
           : ghost
             ? 0.06
             : 0.08
-      glow.current.opacity = ghost ? 0.28 : hasMath ? 0.75 : 0.55
+      glow.current.opacity = ghost ? 0.28 : mathLive ? 0.75 : 0.55
     }
-    if (ring.current && hasMath && !ghost) {
+    if (ring.current && mathLive) {
       ring.current.emissiveIntensity = 0.55 + Math.sin(t * 5.2) * 0.4
       ring.current.opacity = 0.55 + Math.sin(t * 5.2) * 0.35
     }
@@ -114,7 +117,7 @@ function Brick({
           opacity={ghost ? 0.28 : 0.55}
         />
       </mesh>
-      {hasMath && !ghost && (
+      {mathLive && (
         <mesh position={[0, 0, -BRICK_D * 0.05]} rotation={[Math.PI / 2, 0, 0]}>
           <torusGeometry args={[CELL * 0.48, 0.055, 8, 28]} />
           <meshStandardMaterial
@@ -133,7 +136,7 @@ function Brick({
       <group position={[0, 0.02, BRICK_D * 0.1]}>
         <CharmVisual theme={charm} color={base} ghost={ghost} />
       </group>
-      {hasMath && !ghost && (
+      {mathLive && (
         <group position={[0.32, 0.32, BRICK_D * 0.42]}>
           <mesh>
             <circleGeometry args={[0.22, 24]} />
@@ -187,15 +190,12 @@ function ResponsiveIsoCamera() {
     const h = Math.max(1, size.height)
     const aspect = w / h
 
-    // Dialed-back iso: mostly front, slight yaw/pitch for 3D depth.
-    // Steep game-iso crushed the board; dead-flat hid brick sides.
     const dist = 36
     cam.position.set(dist * 0.22, dist * 0.16, dist * 0.96)
     cam.up.set(0, 1, 0)
     cam.lookAt(0, -0.1, 0)
     cam.updateMatrixWorld(true)
 
-    // AABB of playfield + left/right rails + floor + brick depth
     const halfW = BOARD_W / 2 + RAIL_W + 0.15
     const halfH = BOARD_H / 2 + FLOOR_H + 0.25
     const zNear = -RAIL_D * 0.55
@@ -290,6 +290,134 @@ function ClearBurst({ active }: { active: boolean }) {
   )
 }
 
+type Particle = {
+  key: string
+  origin: THREE.Vector3
+  vel: THREE.Vector3
+  spin: THREE.Vector3
+  emoji: string
+  color: THREE.Color
+  delay: number
+}
+
+/** Emoji chunks flying apart on successful ÷ bust — Emoji-Movie energy, light for tablets. */
+function BustExplosionFX({ cells }: { cells: ClusterCell[] }) {
+  const group = useRef<THREE.Group>(null)
+  const start = useRef(performance.now())
+  const particles = useMemo(() => {
+    const list: Particle[] = []
+    cells.forEach((c, i) => {
+      const [px, py, pz] = cellPos(c.x, c.y)
+      const base = new THREE.Color(COLOR_HEX[c.color])
+      const emoji = THEME_EMOJI[c.theme]
+      // 2–3 chunks per cell so it reads as “exploded into pieces”
+      const n = 2 + (i % 2)
+      for (let k = 0; k < n; k++) {
+        const angle = Math.random() * Math.PI * 2
+        const speed = 2.2 + Math.random() * 3.4
+        list.push({
+          key: `${c.x}-${c.y}-${k}`,
+          origin: new THREE.Vector3(
+            px + (Math.random() - 0.5) * 0.25,
+            py + (Math.random() - 0.5) * 0.25,
+            pz + 0.2,
+          ),
+          vel: new THREE.Vector3(
+            Math.cos(angle) * speed,
+            Math.sin(angle) * speed + 1.5,
+            (Math.random() - 0.2) * 2.5,
+          ),
+          spin: new THREE.Vector3(
+            (Math.random() - 0.5) * 8,
+            (Math.random() - 0.5) * 8,
+            (Math.random() - 0.5) * 10,
+          ),
+          emoji,
+          color: base.clone().offsetHSL(0, 0, (Math.random() - 0.5) * 0.1),
+          delay: Math.random() * 0.05,
+        })
+      }
+    })
+    return list
+  }, [cells])
+
+  const refs = useRef<(THREE.Group | null)[]>([])
+
+  useFrame(() => {
+    const t = (performance.now() - start.current) / 1000
+    particles.forEach((p, i) => {
+      const node = refs.current[i]
+      if (!node) return
+      const age = Math.max(0, t - p.delay)
+      const grav = 6.5
+      node.position.set(
+        p.origin.x + p.vel.x * age,
+        p.origin.y + p.vel.y * age - 0.5 * grav * age * age,
+        p.origin.z + p.vel.z * age,
+      )
+      node.rotation.x = p.spin.x * age
+      node.rotation.y = p.spin.y * age
+      node.rotation.z = p.spin.z * age
+      const life = 1 - Math.min(1, age / 0.85)
+      const s = 0.55 + life * 0.55
+      node.scale.setScalar(s * (0.7 + life * 0.3))
+      node.visible = life > 0.02
+    })
+  })
+
+  return (
+    <group ref={group}>
+      {particles.map((p, i) => (
+        <group
+          key={p.key}
+          ref={(el) => {
+            refs.current[i] = el
+          }}
+          position={p.origin.toArray()}
+        >
+          <EmojiChunk emoji={p.emoji} color={p.color} />
+        </group>
+      ))}
+      {/* Flash spark rings at cluster center */}
+      <SparkFlash cells={cells} />
+    </group>
+  )
+}
+
+function SparkFlash({ cells }: { cells: ClusterCell[] }) {
+  const ref = useRef<THREE.Mesh>(null)
+  const start = useRef(performance.now())
+  const center = useMemo(() => {
+    if (!cells.length) return new THREE.Vector3()
+    const s = new THREE.Vector3()
+    for (const c of cells) {
+      const [x, y, z] = cellPos(c.x, c.y)
+      s.x += x
+      s.y += y
+      s.z += z
+    }
+    s.multiplyScalar(1 / cells.length)
+    s.z += 0.5
+    return s
+  }, [cells])
+
+  useFrame(() => {
+    if (!ref.current) return
+    const age = (performance.now() - start.current) / 1000
+    const s = 0.4 + age * 6
+    ref.current.scale.set(s, s, 1)
+    const mat = ref.current.material as THREE.MeshBasicMaterial
+    mat.opacity = Math.max(0, 0.55 - age * 0.9)
+  })
+
+  return (
+    <mesh ref={ref} position={center.toArray()}>
+      <circleGeometry args={[0.6, 28]} />
+      <meshBasicMaterial color="#fff4a8" transparent opacity={0.5} depthWrite={false} />
+    </mesh>
+  )
+}
+
 /**
  * Slim left/right side boards marking the horizontal playfield edges —
  * not a bulky full wooden box. Light floor + back for iso depth.
@@ -305,7 +433,6 @@ function SideBoards() {
 
   return (
     <group>
-      {/* Soft back plane — just enough for shadows / depth, stays light */}
       <mesh position={[0, -FLOOR_H * 0.15, -RAIL_D * 0.42]} receiveShadow>
         <planeGeometry args={[BOARD_W + RAIL_W * 2.4, BOARD_H + FLOOR_H + 0.6]} />
         <meshStandardMaterial
@@ -317,7 +444,6 @@ function SideBoards() {
         />
       </mesh>
 
-      {/* Left rail */}
       <group position={[leftX, railY, -0.15]}>
         <RoundedBox
           args={[RAIL_W, railH, RAIL_D]}
@@ -332,7 +458,6 @@ function SideBoards() {
             metalness={0.08}
           />
         </RoundedBox>
-        {/* Inner face highlight so the boundary reads clearly */}
         <mesh position={[RAIL_W * 0.42, 0, 0.15]}>
           <boxGeometry args={[0.04, railH * 0.96, RAIL_D * 0.7]} />
           <meshStandardMaterial color={woodHi} roughness={0.4} metalness={0.1} />
@@ -343,7 +468,6 @@ function SideBoards() {
         </mesh>
       </group>
 
-      {/* Right rail */}
       <group position={[rightX, railY, -0.15]}>
         <RoundedBox
           args={[RAIL_W, railH, RAIL_D]}
@@ -368,7 +492,6 @@ function SideBoards() {
         </mesh>
       </group>
 
-      {/* Subtle floor strip between the rails */}
       <RoundedBox
         args={[BOARD_W + 0.12, FLOOR_H, RAIL_D * 0.85]}
         radius={0.06}
@@ -380,7 +503,6 @@ function SideBoards() {
         <meshStandardMaterial color={woodHi} roughness={0.6} metalness={0.05} />
       </RoundedBox>
 
-      {/* Faint column guides */}
       {Array.from({ length: COLS + 1 }).map((_, i) => (
         <mesh
           key={`vx-${i}`}
@@ -394,13 +516,28 @@ function SideBoards() {
   )
 }
 
-function Scene({ view, slowMo }: { view: ViewCell[][]; slowMo?: boolean }) {
+function Scene({
+  view,
+  slowMo,
+  explosion,
+}: {
+  view: ViewCell[][]
+  slowMo?: boolean
+  explosion?: BustExplosion | null
+}) {
+  const hideKeys = useMemo(() => {
+    if (!explosion) return null
+    return new Set(explosion.cells.map((c) => `${c.x},${c.y}`))
+  }, [explosion])
+
   const bricks = useMemo(() => {
     const list: ReactNode[] = []
     for (let y = 0; y < ROWS; y++) {
       for (let x = 0; x < COLS; x++) {
         const cell = view[y][x]
         if (cell.color === 'empty') continue
+        // Hide cells mid-bust so chunks replace them.
+        if (hideKeys?.has(`${x},${y}`)) continue
         list.push(
           <Brick
             key={`${x}-${y}-${cell.active ? 'a' : cell.ghost ? 'g' : 'l'}-${cell.color}-${cell.theme ?? ''}`}
@@ -417,7 +554,7 @@ function Scene({ view, slowMo }: { view: ViewCell[][]; slowMo?: boolean }) {
       }
     }
     return list
-  }, [view, slowMo])
+  }, [view, slowMo, hideKeys])
 
   return (
     <>
@@ -425,7 +562,6 @@ function Scene({ view, slowMo }: { view: ViewCell[][]; slowMo?: boolean }) {
       <color attach="background" args={['#16083a']} />
       <ambientLight intensity={0.42} />
       <hemisphereLight args={['#e8dcff', '#1a0a3e', 0.55]} />
-      {/* Key light slightly off-axis so top + side faces still separate */}
       <directionalLight
         castShadow
         position={[6, 12, 14]}
@@ -438,19 +574,21 @@ function Scene({ view, slowMo }: { view: ViewCell[][]; slowMo?: boolean }) {
         shadow-camera-top={16}
         shadow-camera-bottom={-16}
       />
-      {/* Fill + rim so side/top faces separate from the front */}
       <directionalLight position={[-8, 6, 4]} intensity={0.35} color="#cbb8ff" />
       <pointLight position={[-5, 10, 8]} color="#ff9ad8" intensity={0.48} />
       <pointLight position={[6, -2, 7]} color="#7ef5ec" intensity={0.42} />
       <pointLight position={[0, 8, 10]} color="#ffd66e" intensity={0.22} />
       <SideBoards />
       {bricks}
+      {explosion && (
+        <BustExplosionFX key={explosion.id} cells={explosion.cells} />
+      )}
       <ClearBurst active={!!slowMo} />
     </>
   )
 }
 
-export default function Board({ board, piece, shake, slowMo }: Props) {
+export default function Board({ board, piece, shake, slowMo, explosion }: Props) {
   const view = useMemo(() => mergeGhost(board, piece), [board, piece])
 
   return (
@@ -477,7 +615,7 @@ export default function Board({ board, piece, shake, slowMo }: Props) {
         }}
         style={{ pointerEvents: 'none', touchAction: 'none' }}
       >
-        <Scene view={view} slowMo={slowMo} />
+        <Scene view={view} slowMo={slowMo} explosion={explosion} />
       </Canvas>
     </div>
   )

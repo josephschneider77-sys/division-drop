@@ -17,14 +17,22 @@ export default function App() {
   const touchRef = useRef<{ x: number; y: number; t: number } | null>(null)
   const touchHandled = useRef(false)
 
+  /** Math / ÷ bust only on the active falling math piece — never the locked stack. */
+  const mathAvailable =
+    game.phase === 'playing' &&
+    !game.explosion &&
+    !!game.piece?.hasMath &&
+    !game.piece.mathSolved
+
   const onBoardTap = () => {
-    if (game.phase !== 'playing') return
-    // Tap the active math piece (pulsing ÷ block) to open division.
+    if (game.phase !== 'playing' || game.explosion) return
+    // Only the active falling math piece opens division.
     if (game.piece?.hasMath && !game.piece.mathSolved) {
       game.openMath()
       return
     }
-    game.rotate()
+    // No math on locked cells — tap rotates the falling piece only.
+    if (game.piece) game.rotate()
   }
 
   const onTouchStart = (e: React.TouchEvent) => {
@@ -35,7 +43,7 @@ export default function App() {
   const onTouchEnd = (e: React.TouchEvent) => {
     const start = touchRef.current
     touchRef.current = null
-    if (!start || game.phase !== 'playing') return
+    if (!start || game.phase !== 'playing' || game.explosion) return
     const t = e.changedTouches[0]
     const dx = t.clientX - start.x
     const dy = t.clientY - start.y
@@ -63,8 +71,6 @@ export default function App() {
     if (touchHandled.current) return
     onBoardTap()
   }
-
-  const mathAvailable = !!game.piece?.hasMath && !game.piece.mathSolved
 
   return (
     <div className="app">
@@ -98,8 +104,16 @@ export default function App() {
                 piece={game.piece}
                 shake={game.shake}
                 slowMo={game.slowMo}
+                explosion={game.explosion}
               />
             </Suspense>
+          )}
+
+          {mathAvailable && (
+            <div className="bust-banner" aria-live="polite">
+              <span className="bust-banner-icon">÷</span>
+              <span>Tap to bust!</span>
+            </div>
           )}
 
           {game.flashMsg && <div className="flash">{game.flashMsg}</div>}
@@ -131,8 +145,8 @@ export default function App() {
             onSoftDrop={() => game.tryMove(0, 1)}
             onHardDrop={game.hardDrop}
             onRotate={game.rotate}
-            mathHint={mathAvailable && game.phase === 'playing'}
-            disabled={game.phase === 'math'}
+            mathHint={mathAvailable}
+            disabled={game.phase === 'math' || !!game.explosion}
           />
         )}
       </div>

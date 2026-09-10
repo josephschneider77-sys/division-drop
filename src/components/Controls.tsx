@@ -22,7 +22,7 @@ export default function Controls({
     <div className={`controls ${disabled ? 'disabled' : ''}`}>
       {mathHint && (
         <p className="math-hint" aria-live="polite">
-          Tap the pulsing piece to ÷ divide!
+          Tap the board to bust ÷
         </p>
       )}
       <div className="control-row main-row">

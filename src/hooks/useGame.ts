@@ -2,10 +2,12 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import {
   clearFullLines,
   clearMathCluster,
+  collectMathClusterCells,
   emptyBoard,
   fits,
   lockPiece,
   pieceCells,
+  type ClusterCell,
 } from '../game/board'
 import { dropInterval } from '../game/constants'
 import { generateProblem, unlockedFamilies } from '../game/math'
@@ -21,6 +23,12 @@ import type {
 } from '../game/types'
 
 const LINE_SCORES = [0, 100, 300, 500, 800]
+const BUST_EXPLODE_MS = 820
+
+export type BustExplosion = {
+  id: number
+  cells: ClusterCell[]
+}
 
 export function useGame() {
   const [board, setBoard] = useState<Cell[][]>(() => emptyBoard())
@@ -39,6 +47,7 @@ export function useGame() {
   const [shake, setShake] = useState(false)
   const [slowMo, setSlowMo] = useState(false)
   const [flashMsg, setFlashMsg] = useState<string | null>(null)
+  const [explosion, setExplosion] = useState<BustExplosion | null>(null)
 
   const phaseRef = useRef(phase)
   const pieceRef = useRef(piece)
@@ -47,6 +56,7 @@ export function useGame() {
   const nextRef = useRef(nextPiece)
   const progressRef = useRef(progress)
   const slowMoRef = useRef(slowMo)
+  const explodeId = useRef(0)
 
   useEffect(() => {
     phaseRef.current = phase
@@ -123,6 +133,7 @@ export function useGame() {
     setStats({ score: 0, level: 1, lines: 0, combo: 0, problemsSolved: 0 })
     setProblem(null)
     setSlowMo(false)
+    setExplosion(null)
     setPhase('playing')
   }, [])
 
@@ -232,10 +243,12 @@ export function useGame() {
     }
   }, [])
 
+  /** Division / bust only while an active falling math piece exists. */
   const openMath = useCallback(() => {
     if (phaseRef.current !== 'playing') return
     const p = pieceRef.current
     if (!p || !p.hasMath || p.mathSolved) return
+    // Locked stack never opens math — pieceRef is only the falling piece.
     const fams = unlockedFamilies(
       progressRef.current.problemsSolved + statsRef.current.problemsSolved,
       statsRef.current.level,
@@ -259,16 +272,56 @@ export function useGame() {
         setPiece(solved)
         pieceRef.current = solved
 
-        // Clear cluster at piece cells after a brief slow-mo
-        setSlowMo(true)
-        showFlash('÷ POWER CLEAR! ✨')
-
         const cells = pieceCells(solved)
         const anchor = cells[Math.floor(cells.length / 2)] ?? cells[0]
+        // Preview lock so cluster includes the busted piece cells.
+        const preview = lockPiece(boardRef.current, solved)
+        // Temporarily mark anchor hasMath for flood so neighbors join correctly.
+        if (
+          anchor &&
+          anchor.y >= 0 &&
+          anchor.y < preview.length &&
+          anchor.x >= 0 &&
+          anchor.x < preview[0].length
+        ) {
+          preview[anchor.y][anchor.x] = {
+            ...preview[anchor.y][anchor.x],
+            hasMath: true,
+          }
+        }
+        const clusterCells = collectMathClusterCells(
+          preview,
+          anchor.x,
+          anchor.y,
+        )
+
+        explodeId.current += 1
+        setExplosion({ id: explodeId.current, cells: clusterCells })
+        setSlowMo(true)
+        showFlash('÷ POWER CLEAR! ✨')
+        setProblem(null)
+        // Hold in math-resolved beat so gravity / taps pause during boom.
+        setPhase('playing')
+        phaseRef.current = 'playing'
+
+        // Hide the live piece so only explosion chunks show.
+        setPiece(null)
+        pieceRef.current = null
 
         window.setTimeout(() => {
-          // Lock first then clear cluster around anchor
           let locked = lockPiece(boardRef.current, solved)
+          if (
+            anchor &&
+            anchor.y >= 0 &&
+            anchor.y < locked.length &&
+            anchor.x >= 0 &&
+            anchor.x < locked[0].length
+          ) {
+            locked[anchor.y][anchor.x] = {
+              ...locked[anchor.y][anchor.x],
+              hasMath: true,
+            }
+          }
           const cluster = clearMathCluster(locked, anchor.x, anchor.y)
           locked = cluster.board
           const lines = clearFullLines(locked)
@@ -303,12 +356,11 @@ export function useGame() {
             ),
           })
 
+          setExplosion(null)
           setSlowMo(false)
-          setProblem(null)
           setPhase('playing')
-          setPiece(null)
           spawnNext()
-        }, 650)
+        }, BUST_EXPLODE_MS)
       } else {
         // Soft fail
         setShake(true)
@@ -340,15 +392,16 @@ export function useGame() {
     persist({ ...progressRef.current, tipSeen: true })
   }, [persist])
 
-  // Gravity tick
+  // Gravity tick — freeze while explosion plays
   useEffect(() => {
     if (phase !== 'playing') return
+    if (explosion) return
     const ms = slowMo ? dropInterval(stats.level) * 3 : dropInterval(stats.level)
     const id = window.setInterval(() => {
       tryMove(0, 1)
     }, ms)
     return () => window.clearInterval(id)
-  }, [phase, stats.level, slowMo, tryMove])
+  }, [phase, stats.level, slowMo, tryMove, explosion])
 
   // Keyboard
   useEffect(() => {
@@ -359,6 +412,7 @@ export function useGame() {
         return
       }
       if (phaseRef.current === 'math') return
+      if (explosion) return
       if (phaseRef.current !== 'playing') return
       switch (e.key) {
         case 'ArrowLeft':
@@ -400,7 +454,7 @@ export function useGame() {
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [tryMove, rotate, hardDrop, openMath, togglePause])
+  }, [tryMove, rotate, hardDrop, openMath, togglePause, explosion])
 
   return {
     board,
@@ -413,6 +467,7 @@ export function useGame() {
     shake,
     slowMo,
     flashMsg,
+    explosion,
     startGame,
     tryMove,
     hardDrop,

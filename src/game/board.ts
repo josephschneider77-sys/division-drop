@@ -1,5 +1,6 @@
 import { COLS, ROWS, SHAPES } from './constants'
 import { SHAPE_THEME } from './themes'
+import type { CharmTheme } from './themes'
 import type { Cell, CellColor, Piece } from './types'
 
 export function emptyCell(): Cell {
@@ -38,7 +39,8 @@ export function lockPiece(board: Cell[][], piece: Piece): Cell[][] {
     if (y >= 0 && y < ROWS && x >= 0 && x < COLS) {
       next[y][x] = {
         color: piece.color,
-        hasMath: piece.hasMath && !piece.mathSolved,
+        // Math / ÷ bust is only for the active falling piece — never locked stack.
+        hasMath: false,
         locked: true,
         theme,
       }
@@ -67,6 +69,57 @@ export function clearFullLines(board: Cell[][]): {
     remaining.unshift(Array.from({ length: COLS }, () => emptyCell()))
   }
   return { board: remaining, cleared, mathBonus }
+}
+
+export type ClusterCell = {
+  x: number
+  y: number
+  color: Exclude<CellColor, 'empty'>
+  theme: CharmTheme
+}
+
+/** Preview which cells a math bust would clear (no mutation). */
+export function collectMathClusterCells(
+  board: Cell[][],
+  originX: number,
+  originY: number,
+): ClusterCell[] {
+  const out: ClusterCell[] = []
+  const queue: [number, number][] = [[originX, originY]]
+  const seen = new Set<string>()
+  const snapshot = board.map((row) => row.map((c) => ({ ...c })))
+
+  while (queue.length) {
+    const [x, y] = queue.shift()!
+    const key = `${x},${y}`
+    if (seen.has(key)) continue
+    seen.add(key)
+    if (x < 0 || x >= COLS || y < 0 || y >= ROWS) continue
+    const cell = snapshot[y][x]
+    if (cell.color === 'empty') continue
+
+    out.push({
+      x,
+      y,
+      color: cell.color,
+      theme: cell.theme ?? 'crystal',
+    })
+
+    for (const [nx, ny] of [
+      [x - 1, y],
+      [x + 1, y],
+      [x, y - 1],
+      [x, y + 1],
+    ] as const) {
+      if (nx < 0 || nx >= COLS || ny < 0 || ny >= ROWS) continue
+      const n = snapshot[ny][nx]
+      if (n.color === 'empty') continue
+      if (n.color === cell.color || n.hasMath) {
+        queue.push([nx, ny])
+      }
+    }
+  }
+  return out
 }
 
 /** Clear a cluster around a solved math cell (3×3-ish flood of same color + math). */
@@ -138,6 +191,8 @@ export function mergeGhost(
       ;(view[y][x] as Cell & { ghost?: boolean }).ghost = true
       view[y][x].color = piece.color
       view[y][x].theme = theme
+      // Ghost never carries live math interaction.
+      view[y][x].hasMath = false
     }
   }
 

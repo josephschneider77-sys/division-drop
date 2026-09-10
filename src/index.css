@@ -556,3 +556,49 @@ h2 {
 .board-loading {
   background: linear-gradient(180deg, #1a0a3e, #120628);
 }
+
+/* On-playfield bust prompt — only while a math piece is actively falling */
+.bust-banner {
+  position: absolute;
+  top: 10%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-weight: 900;
+  font-size: 1.05rem;
+  color: #2a0a3e;
+  background: linear-gradient(180deg, #fff4c2, #ffc83d);
+  border: 2px solid rgba(255, 255, 255, 0.65);
+  box-shadow: 0 6px 20px rgba(255, 200, 61, 0.45), 0 0 0 3px rgba(91, 44, 255, 0.25);
+  pointer-events: none;
+  white-space: nowrap;
+  animation: bustPulse 1.15s ease-in-out infinite;
+}
+
+.bust-banner-icon {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #5b2cff;
+  color: #fff8e7;
+  font-size: 1rem;
+  font-weight: 900;
+  box-shadow: 0 2px 0 #3a1899;
+}
+
+@keyframes bustPulse {
+  0%,
+  100% {
+    transform: translateX(-50%) scale(1);
+  }
+  50% {
+    transform: translateX(-50%) scale(1.05);
+  }
+}

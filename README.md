@@ -15,9 +15,10 @@ No accounts, no ads, no tracking. Progress (high score, level, unlocked families
 
 ## How math power-ups work
 
-- Some falling pieces **pulse and glow** with a **÷** badge.
-- **Tap the pulsing piece** (or press Enter on a keyboard) to open a division question.
-- **Correct answer:** punchy clear burst + points + a short slow-mo moment.
+- Some **actively falling** pieces **pulse and glow** with a **÷** badge (locked stack cells are never tappable for math).
+- A floating **“Tap to bust! ÷”** banner appears on the playfield while a math piece is falling.
+- **Tap the board** (or press Enter) to open a division question — only while that math piece is still falling.
+- **Correct answer:** emoji chunks explode apart, then clear + points + a short slow-mo moment.
 - **Wrong answer:** soft fail — brief shake, piece keeps falling, game continues.
 - **Skip** anytime (secondary) and keep stacking. Math is an advantage, not a gate.
 
@@ -33,7 +34,7 @@ v1 uses **3 multiple-choice** answers (fat-finger friendly) plus an optional on-
 
 ## Look & feel
 
-Playfield is a **Three.js / react-three-fiber** mild orthographic 3D stack. Each tetromino keeps classic grid footprints (rotate / collide / stack like Tetris) but renders **emoji-forward** on light candy pedestals:
+Playfield is a **Three.js / react-three-fiber** mild orthographic 3D stack. Each tetromino keeps classic grid footprints (rotate / collide / stack like Tetris) but renders **chunky volumetric 3D emoji characters** (rounded candy bodies + glossy materials + emoji faces — Emoji Movie energy) that still fit the grid:
 
 | Shape | Emoji | Charm |
 |-------|-------|-------|
