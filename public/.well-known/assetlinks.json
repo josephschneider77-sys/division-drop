@@ -1,12 +1,11 @@
-[
-  {
-    "relation": ["delegate_permission/common.handle_all_urls"],
-    "target": {
-      "namespace": "android_app",
-      "package_name": "com.josephschneider77.divisiondrop",
-      "sha256_cert_fingerprints": [
-        "REPLACE_WITH_UPLOAD_KEY_SHA256"
-      ]
-    }
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "com.josephschneider77.divisiondrop",
+    "sha256_cert_fingerprints": [
+      "B4:72:81:F8:57:F1:60:0B:B2:4F:00:FF:C8:19:73:C8:3A:82:92:7B:09:FF:5C:26:83:9A:84:A0:4B:E5:42:EB",
+      "58:F5:E2:28:24:B3:09:8C:A3:52:72:2F:2D:43:78:0E:A1:B1:68:1F:AB:56:B7:EB:9E:1D:37:32:7F:B4:4C:9E"
+    ]
   }
-]
+}]
