@@ -9,6 +9,7 @@ import {
   ReadyOverlay,
 } from './components/Overlays'
 import { useGame } from './hooks/useGame'
+import { unlockAudio } from './audio/sounds'
 
 const Board = lazy(() => import('./components/Board'))
 
@@ -28,6 +29,7 @@ export default function App() {
   const showBustTip = mathAvailable && game.coachActive
 
   const onBoardTap = () => {
+    unlockAudio()
     if (game.phase !== 'playing' || game.explosion) return
     // Only the active falling math piece opens division.
     if (game.piece?.hasMath && !game.piece.mathSolved) {

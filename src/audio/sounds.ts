@@ -1,62 +1,57 @@
-/** Lightweight game audio — respects mute; unlocks on first gesture. */
+/** Game audio — Web Audio unlock + HTMLAudio playback. */
 
 const BASE = `${import.meta.env.BASE_URL}sounds/`
 
 let muted = false
 let unlocked = false
+let ctx: AudioContext | null = null
 let bg: HTMLAudioElement | null = null
-let bustBuf: HTMLAudioElement | null = null
-let oppBuf: HTMLAudioElement | null = null
 
-function make(src: string, loop = false): HTMLAudioElement {
-  const a = new Audio(src)
-  a.preload = 'auto'
-  a.loop = loop
-  return a
+function getCtx(): AudioContext | null {
+  if (typeof window === 'undefined') return null
+  if (!ctx) {
+    const AC =
+      window.AudioContext ||
+      (window as unknown as { webkitAudioContext?: typeof AudioContext })
+        .webkitAudioContext
+    if (!AC) return null
+    ctx = new AC()
+  }
+  return ctx
 }
 
-function ensure(): void {
-  if (typeof window === 'undefined') return
+function ensureBg(): HTMLAudioElement {
   if (!bg) {
-    bg = make(`${BASE}bg-witchy.mp3`, true)
-    bg.volume = 0.28
+    bg = new Audio(`${BASE}bg-witchy.mp3`)
+    bg.preload = 'auto'
+    bg.loop = true
+    bg.volume = 0.55
   }
-  if (!bustBuf) {
-    bustBuf = make(`${BASE}bust.mp3`)
-    bustBuf.volume = 0.7
-  }
-  if (!oppBuf) {
-    oppBuf = make(`${BASE}div-opportunity.mp3`)
-    oppBuf.volume = 0.55
-  }
+  return bg
 }
 
-/** Call from a user gesture (Start / tap) so mobile browsers allow playback. */
+/** Must run inside a user gesture (Start / tap). */
 export function unlockAudio(): void {
-  ensure()
   unlocked = true
-  // Silent prime
-  const prime = [bg, bustBuf, oppBuf]
-  for (const a of prime) {
-    if (!a) continue
-    const prev = a.volume
-    a.volume = 0
-    void a
-      .play()
-      .then(() => {
-        a.pause()
-        a.currentTime = 0
-        a.volume = prev
-      })
-      .catch(() => {
-        a.volume = prev
-      })
+  const c = getCtx()
+  if (c && c.state === 'suspended') {
+    void c.resume().catch(() => {
+      /* ignore */
+    })
   }
+  // Prime SFX only — never pause the bg element after Start.
+  const ping = new Audio(`${BASE}div-opportunity.mp3`)
+  ping.volume = 0.01
+  void ping.play().then(() => {
+    ping.pause()
+  }).catch(() => {
+    /* ignore */
+  })
+  ensureBg().load()
 }
 
 export function setMuted(next: boolean): void {
   muted = next
-  ensure()
   if (muted) {
     bg?.pause()
   }
@@ -67,11 +62,12 @@ export function isMuted(): boolean {
 }
 
 export function startWitchyBg(): void {
-  ensure()
-  if (!unlocked || muted || !bg) return
-  if (bg.paused) {
-    void bg.play().catch(() => {
-      /* autoplay blocked until unlock */
+  if (!unlocked || muted) return
+  const a = ensureBg()
+  a.volume = 0.55
+  if (a.paused) {
+    void a.play().catch(() => {
+      /* still blocked */
     })
   }
 }
@@ -86,23 +82,19 @@ export function pauseWitchyBg(): void {
   bg?.pause()
 }
 
-function playClone(source: HTMLAudioElement | null, volume: number): void {
-  if (!source || muted || !unlocked) return
-  const a = source.cloneNode(true) as HTMLAudioElement
+function playUrl(file: string, volume: number): void {
+  if (!unlocked || muted) return
+  const a = new Audio(`${BASE}${file}`)
   a.volume = volume
   void a.play().catch(() => {
     /* ignore */
   })
 }
 
-/** Magical shatter when ÷ bust succeeds. */
 export function playBust(): void {
-  ensure()
-  playClone(bustBuf, 0.72)
+  playUrl('bust.mp3', 0.9)
 }
 
-/** Chime when a glowing ÷ piece appears. */
 export function playDivOpportunity(): void {
-  ensure()
-  playClone(oppBuf, 0.58)
+  playUrl('div-opportunity.mp3', 0.8)
 }

@@ -153,8 +153,11 @@ export function useGame() {
     setExplosion(null)
     setCoachActive(true)
     setPhase('playing')
-    if (!progressRef.current.muted) startWitchyBg()
-    if (first.hasMath) playDivOpportunity()
+    // Defer playback until after unlock primes AudioContext (same gesture tick).
+    window.setTimeout(() => {
+      if (!progressRef.current.muted) startWitchyBg()
+      if (first.hasMath) playDivOpportunity()
+    }, 0)
   }, [])
 
   const lockAndContinue = useCallback(
