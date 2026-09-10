@@ -19,7 +19,6 @@ import {
   playLevelUp,
   playLineClear,
   playLock,
-  playSoftFail,
   setMuted,
   unlockAudio,
 } from '../audio/sounds'
@@ -297,7 +296,6 @@ export function useGame() {
 
   const softFailMath = useCallback(
     (msg = 'Oops — keep going!') => {
-      playSoftFail()
       setShake(true)
       showFlash(msg)
       window.setTimeout(() => setShake(false), 400)

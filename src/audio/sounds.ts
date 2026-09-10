@@ -12,7 +12,18 @@ const DIVIDE_VO = [
   'vo/divide-6.mp3',
 ] as const
 
+/** Joe's recorded miss / show-correct-answer lines. */
+const CORRECT_VO = [
+  'vo/correct-1.mp3',
+  'vo/correct-2.mp3',
+  'vo/correct-3.mp3',
+  'vo/correct-4.mp3',
+  'vo/correct-5.mp3',
+  'vo/correct-6.mp3',
+] as const
+
 let lastVo = -1
+let lastCorrectVo = -1
 
 let muted = false
 let unlocked = false
@@ -99,9 +110,20 @@ export function playLineClear(lines = 1): void {
   playUrl('line-clear.mp3', Math.min(1, 0.65 + lines * 0.08))
 }
 
-/** Wrong answer / timeout — soft, not punishing. */
+/** Wrong answer / timeout — random VO while correct answer is shown. */
 export function playSoftFail(): void {
-  playUrl('soft-fail.mp3', 0.5)
+  if (!CORRECT_VO.length) {
+    playUrl('soft-fail.mp3', 0.5)
+    return
+  }
+  let idx = Math.floor(Math.random() * CORRECT_VO.length)
+  if (CORRECT_VO.length > 1 && idx === lastCorrectVo) {
+    idx = (idx + 1) % CORRECT_VO.length
+  }
+  lastCorrectVo = idx
+  playUrl(CORRECT_VO[idx], 1)
+  // Soft under the voice.
+  window.setTimeout(() => playUrl('soft-fail.mp3', 0.28), 80)
 }
 
 /** Level increased — faster! */
