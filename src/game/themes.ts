@@ -22,7 +22,7 @@ export const SHAPE_THEME: Record<ShapeId, CharmTheme> = {
   Z: 'pumpkin',
 }
 
-/** Stable pastel color per theme so pieces read clearly on Android. */
+/** Stable pastel color per theme so pedestals read clearly on Android. */
 export const THEME_COLOR: Record<CharmTheme, Exclude<CellColor, 'empty'>> = {
   star: 'amber',
   moon: 'sky',
@@ -34,14 +34,15 @@ export const THEME_COLOR: Record<CharmTheme, Exclude<CellColor, 'empty'>> = {
   pumpkin: 'coral',
 }
 
+/** Readable emoji glyphs — primary visual for every cell. */
 export const THEME_EMOJI: Record<CharmTheme, string> = {
   star: '⭐',
   moon: '🌙',
   cat: '🐱',
-  witchHat: '🧙',
+  witchHat: '🧙‍♀️',
   potion: '🧪',
   broom: '🧹',
-  crystal: '💎',
+  crystal: '✨',
   pumpkin: '🎃',
 }
 
@@ -49,9 +50,9 @@ export const THEME_LABEL: Record<CharmTheme, string> = {
   star: 'Star',
   moon: 'Moon',
   cat: 'Kitty',
-  witchHat: 'Witch hat',
+  witchHat: 'Witch',
   potion: 'Potion',
   broom: 'Broom',
-  crystal: 'Crystal',
+  crystal: 'Sparkle',
   pumpkin: 'Pumpkin',
 }

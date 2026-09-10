@@ -14,7 +14,7 @@ export default function ParentTip({ onDismiss }: Props) {
         </p>
         <ul>
           <li>Portrait mode is best</li>
-          <li>Big buttons for little fingers</li>
+          <li>Big ◀ ↻ ▶ buttons; tap a pulsing piece to divide</li>
           <li>Math is optional — she can just stack if she wants</li>
         </ul>
         <button type="button" className="primary-btn" onClick={onDismiss}>

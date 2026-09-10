@@ -59,37 +59,43 @@ function Brick({
   burst?: boolean
 }) {
   const group = useRef<THREE.Group>(null)
-  const mat = useRef<THREE.MeshStandardMaterial>(null)
+  const glow = useRef<THREE.MeshStandardMaterial>(null)
+  const ring = useRef<THREE.MeshStandardMaterial>(null)
   const base = useMemo(() => new THREE.Color(COLOR_HEX[color]), [color])
   const charm = theme ?? 'crystal'
 
   useFrame(({ clock }) => {
     if (!group.current) return
     const t = clock.getElapsedTime()
-    let s = active ? 0.94 : 1
-    if (hasMath && !ghost) s *= 1 + Math.sin(t * 4.5) * 0.04
-    if (burst) s *= 1 + Math.sin(t * 18) * 0.08
+    // Strong pulse on math-enabled pieces so they read as tappable.
+    let s = active ? 0.96 : 1
+    if (hasMath && !ghost) s *= 1 + Math.sin(t * 5.2) * 0.12
+    if (burst) s *= 1 + Math.sin(t * 18) * 0.1
     group.current.scale.setScalar(s)
-    // Gentle idle twinkle for active charms
     if (active && !ghost) {
-      group.current.rotation.z = Math.sin(t * 1.6) * 0.06
+      group.current.rotation.z = Math.sin(t * 1.8) * 0.05
     } else {
       group.current.rotation.z = 0
     }
-    if (mat.current) {
-      mat.current.emissiveIntensity = burst
-        ? 0.55 + Math.sin(t * 14) * 0.25
+    if (glow.current) {
+      glow.current.emissiveIntensity = burst
+        ? 0.7 + Math.sin(t * 14) * 0.3
         : hasMath && !ghost
-          ? 0.28 + Math.sin(t * 3.2) * 0.12
+          ? 0.45 + Math.sin(t * 5.2) * 0.35
           : ghost
-            ? 0.08
-            : 0.1
+            ? 0.06
+            : 0.08
+      glow.current.opacity = ghost ? 0.28 : hasMath ? 0.75 : 0.55
+    }
+    if (ring.current && hasMath && !ghost) {
+      ring.current.emissiveIntensity = 0.55 + Math.sin(t * 5.2) * 0.4
+      ring.current.opacity = 0.55 + Math.sin(t * 5.2) * 0.35
     }
   })
 
   return (
     <group ref={group} position={cellPos(x, y)}>
-      {/* Soft candy pedestal (flat coin) so charms still read as grid occupants */}
+      {/* Soft candy pedestal so emoji cells still read as grid occupants */}
       <mesh
         position={[0, 0, -BRICK_D * 0.22]}
         rotation={[Math.PI / 2, 0, 0]}
@@ -98,27 +104,44 @@ function Brick({
       >
         <cylinderGeometry args={[CELL * 0.44, CELL * 0.44, BRICK_D * 0.22, 14]} />
         <meshStandardMaterial
+          ref={glow}
           color={base}
           emissive={base}
-          emissiveIntensity={ghost ? 0.05 : 0.04}
+          emissiveIntensity={ghost ? 0.05 : 0.08}
           roughness={0.45}
           metalness={0.08}
-          transparent={!!ghost}
+          transparent
           opacity={ghost ? 0.28 : 0.55}
         />
       </mesh>
-      <group position={[0, 0.02, BRICK_D * 0.08]}>
-        <CharmVisual theme={charm} color={base} ghost={ghost} matRef={mat} />
+      {hasMath && !ghost && (
+        <mesh position={[0, 0, -BRICK_D * 0.05]} rotation={[Math.PI / 2, 0, 0]}>
+          <torusGeometry args={[CELL * 0.48, 0.055, 8, 28]} />
+          <meshStandardMaterial
+            ref={ring}
+            color="#ffc83d"
+            emissive="#ffc83d"
+            emissiveIntensity={0.7}
+            transparent
+            opacity={0.75}
+            roughness={0.35}
+            metalness={0.2}
+            depthWrite={false}
+          />
+        </mesh>
+      )}
+      <group position={[0, 0.02, BRICK_D * 0.1]}>
+        <CharmVisual theme={charm} color={base} ghost={ghost} />
       </group>
       {hasMath && !ghost && (
-        <group position={[0, 0, BRICK_D * 0.52]}>
+        <group position={[0.32, 0.32, BRICK_D * 0.42]}>
           <mesh>
-            <circleGeometry args={[0.28, 24]} />
+            <circleGeometry args={[0.22, 24]} />
             <meshStandardMaterial
               color="#fff8e7"
               emissive="#ffc83d"
-              emissiveIntensity={0.65}
-              roughness={0.4}
+              emissiveIntensity={0.85}
+              roughness={0.35}
             />
           </mesh>
           <MathGlyph />
@@ -131,7 +154,7 @@ function Brick({
 /** Lightweight ÷ mark without font loading (mobile-friendly). */
 function MathGlyph() {
   return (
-    <group position={[0, 0, 0.02]}>
+    <group position={[0, 0, 0.02]} scale={0.78}>
       <mesh position={[0, 0.12, 0]}>
         <boxGeometry args={[0.08, 0.08, 0.04]} />
         <meshBasicMaterial color="#5b2cff" />

@@ -15,6 +15,17 @@ const Board = lazy(() => import('./components/Board'))
 export default function App() {
   const game = useGame()
   const touchRef = useRef<{ x: number; y: number; t: number } | null>(null)
+  const touchHandled = useRef(false)
+
+  const onBoardTap = () => {
+    if (game.phase !== 'playing') return
+    // Tap the active math piece (pulsing ÷ block) to open division.
+    if (game.piece?.hasMath && !game.piece.mathSolved) {
+      game.openMath()
+      return
+    }
+    game.rotate()
+  }
 
   const onTouchStart = (e: React.TouchEvent) => {
     const t = e.changedTouches[0]
@@ -30,21 +41,30 @@ export default function App() {
     const dy = t.clientY - start.y
     const adx = Math.abs(dx)
     const ady = Math.abs(dy)
+    touchHandled.current = true
+    window.setTimeout(() => {
+      touchHandled.current = false
+    }, 450)
+
     if (adx < 24 && ady < 24) {
-      // tap = rotate
-      game.rotate()
+      onBoardTap()
       return
     }
     if (adx > ady) {
       if (dx > 0) game.tryMove(1, 0)
       else game.tryMove(-1, 0)
-    } else {
-      if (dy > 40) {
-        if (dy > 120) game.hardDrop()
-        else game.tryMove(0, 1)
-      }
+    } else if (dy > 40) {
+      if (dy > 120) game.hardDrop()
+      else game.tryMove(0, 1)
     }
   }
+
+  const onClick = () => {
+    if (touchHandled.current) return
+    onBoardTap()
+  }
+
+  const mathAvailable = !!game.piece?.hasMath && !game.piece.mathSolved
 
   return (
     <div className="app">
@@ -66,6 +86,7 @@ export default function App() {
           className="playfield"
           onTouchStart={onTouchStart}
           onTouchEnd={onTouchEnd}
+          onClick={onClick}
         >
           {(game.phase === 'playing' ||
             game.phase === 'paused' ||
@@ -110,8 +131,7 @@ export default function App() {
             onSoftDrop={() => game.tryMove(0, 1)}
             onHardDrop={game.hardDrop}
             onRotate={game.rotate}
-            onMath={game.openMath}
-            mathAvailable={!!game.piece?.hasMath && !game.piece.mathSolved}
+            mathHint={mathAvailable && game.phase === 'playing'}
             disabled={game.phase === 'math'}
           />
         )}

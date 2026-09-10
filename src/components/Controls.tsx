@@ -4,9 +4,9 @@ interface Props {
   onSoftDrop: () => void
   onHardDrop: () => void
   onRotate: () => void
-  onMath: () => void
-  mathAvailable: boolean
   disabled?: boolean
+  /** Soft hint when a pulsing math piece can be tapped. */
+  mathHint?: boolean
 }
 
 export default function Controls({
@@ -15,48 +15,61 @@ export default function Controls({
   onSoftDrop,
   onHardDrop,
   onRotate,
-  onMath,
-  mathAvailable,
   disabled,
+  mathHint,
 }: Props) {
   return (
     <div className={`controls ${disabled ? 'disabled' : ''}`}>
+      {mathHint && (
+        <p className="math-hint" aria-live="polite">
+          Tap the pulsing piece to ÷ divide!
+        </p>
+      )}
       <div className="control-row main-row">
-        <button type="button" className="ctrl" onClick={onLeft} aria-label="Left">
+        <button
+          type="button"
+          className="ctrl primary"
+          onClick={onLeft}
+          aria-label="Left"
+        >
           ◀
-        </button>
-        <button type="button" className="ctrl" onClick={onRotate} aria-label="Rotate">
-          ↻
-        </button>
-        <button type="button" className="ctrl" onClick={onRight} aria-label="Right">
-          ▶
-        </button>
-        <button type="button" className="ctrl" onClick={onSoftDrop} aria-label="Soft drop">
-          ▼
         </button>
         <button
           type="button"
-          className="ctrl hard"
-          onClick={onHardDrop}
-          aria-label="Hard drop"
+          className="ctrl primary rotate"
+          onClick={onRotate}
+          aria-label="Rotate"
         >
-          ⬇
+          ↻
+        </button>
+        <button
+          type="button"
+          className="ctrl primary"
+          onClick={onRight}
+          aria-label="Right"
+        >
+          ▶
         </button>
       </div>
 
-      <button
-        type="button"
-        className={`power-btn ${mathAvailable ? 'lit' : ''}`}
-        onClick={onMath}
-        disabled={!mathAvailable}
-        aria-label="Division power-up"
-      >
-        <span className="power-glow" aria-hidden />
-        <span className="power-icon">÷</span>
-        <span className="power-label">
-          {mathAvailable ? 'POWER UP!' : '÷ Power'}
-        </span>
-      </button>
+      <div className="control-row drop-row">
+        <button
+          type="button"
+          className="ctrl secondary"
+          onClick={onSoftDrop}
+          aria-label="Soft drop"
+        >
+          ▼ Soft
+        </button>
+        <button
+          type="button"
+          className="ctrl secondary hard"
+          onClick={onHardDrop}
+          aria-label="Hard drop"
+        >
+          ⬇ Drop
+        </button>
+      </div>
     </div>
   )
 }

@@ -14,7 +14,7 @@ export interface Cell {
   color: CellColor
   hasMath: boolean
   locked: boolean
-  /** Charm theme for 3D mesh; set when a piece locks / is active. */
+  /** Charm theme for emoji cell; set when a piece locks / is active. */
   theme?: CharmTheme
 }
 
