@@ -1,11 +1,10 @@
-/** Game audio — Web Audio unlock + HTMLAudio playback. */
+/** Juicy game SFX — no background loop; dopamine hits on play actions. */
 
 const BASE = `${import.meta.env.BASE_URL}sounds/`
 
 let muted = false
 let unlocked = false
 let ctx: AudioContext | null = null
-let bg: HTMLAudioElement | null = null
 
 function getCtx(): AudioContext | null {
   if (typeof window === 'undefined') return null
@@ -20,17 +19,7 @@ function getCtx(): AudioContext | null {
   return ctx
 }
 
-function ensureBg(): HTMLAudioElement {
-  if (!bg) {
-    bg = new Audio(`${BASE}bg-witchy.mp3`)
-    bg.preload = 'auto'
-    bg.loop = true
-    bg.volume = 0.55
-  }
-  return bg
-}
-
-/** Must run inside a user gesture (Start / tap). */
+/** Call from a user gesture (Start / tap). */
 export function unlockAudio(): void {
   unlocked = true
   const c = getCtx()
@@ -39,47 +28,25 @@ export function unlockAudio(): void {
       /* ignore */
     })
   }
-  // Prime SFX only — never pause the bg element after Start.
-  const ping = new Audio(`${BASE}div-opportunity.mp3`)
+  // Prime one short file so later plays aren’t blocked.
+  const ping = new Audio(`${BASE}lock.mp3`)
   ping.volume = 0.01
-  void ping.play().then(() => {
-    ping.pause()
-  }).catch(() => {
-    /* ignore */
-  })
-  ensureBg().load()
+  void ping
+    .play()
+    .then(() => {
+      ping.pause()
+    })
+    .catch(() => {
+      /* ignore */
+    })
 }
 
 export function setMuted(next: boolean): void {
   muted = next
-  if (muted) {
-    bg?.pause()
-  }
 }
 
 export function isMuted(): boolean {
   return muted
-}
-
-export function startWitchyBg(): void {
-  if (!unlocked || muted) return
-  const a = ensureBg()
-  a.volume = 0.55
-  if (a.paused) {
-    void a.play().catch(() => {
-      /* still blocked */
-    })
-  }
-}
-
-export function stopWitchyBg(): void {
-  if (!bg) return
-  bg.pause()
-  bg.currentTime = 0
-}
-
-export function pauseWitchyBg(): void {
-  bg?.pause()
 }
 
 function playUrl(file: string, volume: number): void {
@@ -91,10 +58,37 @@ function playUrl(file: string, volume: number): void {
   })
 }
 
-export function playBust(): void {
-  playUrl('bust.mp3', 0.9)
+/** Glowing ÷ brick appeared — "ooh, power-up!" */
+export function playDivOpportunity(): void {
+  playUrl('div-opportunity.mp3', 0.85)
 }
 
-export function playDivOpportunity(): void {
-  playUrl('div-opportunity.mp3', 0.8)
+/** Successful ÷ bust / power-clear — big reward. */
+export function playBust(): void {
+  playUrl('bust.mp3', 0.95)
 }
+
+/** Piece locked into the stack. */
+export function playLock(): void {
+  playUrl('lock.mp3', 0.55)
+}
+
+/** Line(s) cleared. */
+export function playLineClear(lines = 1): void {
+  playUrl('line-clear.mp3', Math.min(1, 0.65 + lines * 0.08))
+}
+
+/** Wrong answer / timeout — soft, not punishing. */
+export function playSoftFail(): void {
+  playUrl('soft-fail.mp3', 0.5)
+}
+
+/** Level increased — faster! */
+export function playLevelUp(): void {
+  playUrl('level-up.mp3', 0.8)
+}
+
+// Back-compat no-ops (BGM removed on purpose).
+export function startWitchyBg(): void {}
+export function stopWitchyBg(): void {}
+export function pauseWitchyBg(): void {}

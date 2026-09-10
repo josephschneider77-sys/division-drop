@@ -14,12 +14,13 @@ import { generateProblem, unlockedFamilies } from '../game/math'
 import { resetBag, rotatePiece, spawnPiece } from '../game/pieces'
 import { loadProgress, mergeUnlocks, saveProgress } from '../game/storage'
 import {
-  pauseWitchyBg,
   playBust,
   playDivOpportunity,
+  playLevelUp,
+  playLineClear,
+  playLock,
+  playSoftFail,
   setMuted,
-  startWitchyBg,
-  stopWitchyBg,
   unlockAudio,
 } from '../audio/sounds'
 import type {
@@ -155,7 +156,6 @@ export function useGame() {
     setPhase('playing')
     // Defer playback until after unlock primes AudioContext (same gesture tick).
     window.setTimeout(() => {
-      if (!progressRef.current.muted) startWitchyBg()
       if (first.hasMath) playDivOpportunity()
     }, 0)
   }, [])
@@ -175,6 +175,8 @@ export function useGame() {
       const piecesLocked = s.piecesLocked + 1
       const prevLevel = s.level
 
+      playLock()
+
       if (lineResult.cleared > 0) {
         combo += 1
         scoreAdd +=
@@ -182,6 +184,7 @@ export function useGame() {
           combo * 25 +
           lineResult.mathBonus * 50
         lines += lineResult.cleared
+        playLineClear(lineResult.cleared)
         showFlash(
           lineResult.cleared === 1
             ? 'Nice line!'
@@ -198,6 +201,7 @@ export function useGame() {
 
       const level = computeLevel(lines, piecesLocked)
       if (level > prevLevel) {
+        playLevelUp()
         showFlash(`Level ${level} — faster!`)
       }
 
@@ -293,6 +297,7 @@ export function useGame() {
 
   const softFailMath = useCallback(
     (msg = 'Oops — keep going!') => {
+      playSoftFail()
       setShake(true)
       showFlash(msg)
       window.setTimeout(() => setShake(false), 400)
@@ -390,6 +395,7 @@ export function useGame() {
             combo: statsRef.current.combo + 1,
           }
           if (nextLevel > statsRef.current.level) {
+            playLevelUp()
             showFlash(`Level ${nextLevel} — faster!`)
           }
           statsRef.current = nextStats
@@ -433,25 +439,16 @@ export function useGame() {
     const next = { ...progressRef.current, muted: !progressRef.current.muted }
     persist(next)
     setMuted(next.muted)
-    if (next.muted) pauseWitchyBg()
-    else if (phaseRef.current === 'playing') startWitchyBg()
   }, [persist])
 
   const dismissTip = useCallback(() => {
     persist({ ...progressRef.current, tipSeen: true })
   }, [persist])
 
-  // Background music follows play / pause / mute
+  // Keep audio mute flag in sync with saved preference
   useEffect(() => {
     setMuted(progress.muted)
-    if (progress.muted) {
-      pauseWitchyBg()
-      return
-    }
-    if (phase === 'playing') startWitchyBg()
-    else if (phase === 'paused' || phase === 'math') pauseWitchyBg()
-    else stopWitchyBg()
-  }, [phase, progress.muted])
+  }, [progress.muted])
 
   // Gravity tick — freeze while explosion plays
   useEffect(() => {
