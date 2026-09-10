@@ -12,6 +12,8 @@ function bagShuffle(): ShapeId[] {
 }
 
 let bag: ShapeId[] = []
+/** After a non-math spawn, the next piece must include math (~50% floor). */
+let lastWasNonMath = false
 
 export function nextShape(): ShapeId {
   if (bag.length === 0) bag = bagShuffle()
@@ -23,13 +25,16 @@ export function spawnPiece(forceMath = false): Piece {
   const rotations = SHAPES[shape]
   const width = Math.max(...rotations[0].map(([x]) => x)) + 1
   const theme = SHAPE_THEME[shape]
+  const hasMath =
+    forceMath || lastWasNonMath || Math.random() < MATH_CHANCE
+  lastWasNonMath = !hasMath
   return {
     shape,
     rotation: 0,
     x: Math.floor((COLS - width) / 2),
     y: 0,
     color: THEME_COLOR[theme],
-    hasMath: forceMath || Math.random() < MATH_CHANCE,
+    hasMath,
     mathSolved: false,
   }
 }
@@ -41,4 +46,5 @@ export function rotatePiece(piece: Piece): Piece {
 
 export function resetBag(): void {
   bag = []
+  lastWasNonMath = false
 }
