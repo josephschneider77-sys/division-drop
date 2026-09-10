@@ -14,15 +14,15 @@ export const COLORS: CellColor[] = [
   'coral',
 ]
 
-/** Soft pastel candy palette (readable on Android). */
+/** Loud Lisa Frank folder palette — hot pink / purple / teal / neon yellow (tablet-readable). */
 export const COLOR_HEX: Record<Exclude<CellColor, 'empty'>, string> = {
-  cyan: '#A8F5EF',
-  pink: '#FFB8E6',
-  lime: '#D6F5A8',
-  amber: '#FFE08A',
-  violet: '#D8C8FF',
-  sky: '#B5DCFF',
-  coral: '#FFB8A8',
+  cyan: '#2EFFF0',
+  pink: '#FF4FD8',
+  lime: '#C8FF3D',
+  amber: '#FFE600',
+  violet: '#B44CFF',
+  sky: '#4DCFFF',
+  coral: '#FF6B9A',
 }
 
 /** Relative cell offsets for each shape / rotation (0–3). */

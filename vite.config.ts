@@ -14,8 +14,8 @@ export default defineConfig({
         short_name: 'DivDrop',
         description:
           'A cheerful falling-block game that practices 3rd-grade division. Math is a power-up, not a gate!',
-        theme_color: '#8B6CFF',
-        background_color: '#2A1850',
+        theme_color: '#FF4FD8',
+        background_color: '#4A0A7A',
         display: 'standalone',
         orientation: 'portrait',
         start_url: '/division-drop/',

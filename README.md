@@ -16,7 +16,7 @@ No accounts, no ads, no tracking. Progress (high score, level, unlocked families
 ## How math power-ups work
 
 - Some **actively falling** pieces **pulse and glow** with a **÷** badge (locked stack cells are never tappable for math).
-- A slim **“Tap to bust! ÷”** side panel sits to the **left of the well** while a math piece is falling (never covers the stack).
+- A slim **“Tap to bust! ÷”** side panel sits to the **left of the well** on the **first** math piece only (persisted in localStorage; never covers the stack).
 - **Tap the board** (or press Enter) to open a division question — only while that math piece is still falling.
 - **Correct answer:** emoji chunks explode apart, then clear + points + a short slow-mo moment.
 - **Wrong answer:** soft fail — brief shake, piece keeps falling, game continues.
@@ -47,7 +47,7 @@ Playfield is a **Three.js / react-three-fiber** mild orthographic 3D stack. Each
 | Z | 🎃 | Pumpkin |
 | Dot | ✨ | Sparkle |
 
-Slim pastel candy rails mark the move edges; a soft isometric camera zooms the board to fill the screen on phone/tablet. Soft pastel candy palette for pedestals, rails, background, and HUD. Compact HUD and controls keep the play area dominant. Adaptive math — no Facts HUD.
+Slim **Lisa Frank** folder chrome rails (hot pink / teal / neon yellow) mark the move edges; a soft isometric camera zooms the board to fill the screen on phone/tablet. Loud cute 90s folder palette — hot pink, purple, teal, neon yellow, rainbow accents, sparkles — for pedestals, rails, background, and HUD (still readable on Android tablets). Compact HUD and controls keep the play area dominant. Adaptive math — no Facts HUD.
 
 ## Develop
 

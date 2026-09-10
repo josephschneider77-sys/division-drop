@@ -256,7 +256,11 @@ export function useGame() {
     const prob = generateProblem(fams, statsRef.current.level >= 4)
     setProblem(prob)
     setPhase('math')
-  }, [])
+    // Persist: after first bust opportunity, never re-show Tap-to-bust tips.
+    if (!progressRef.current.bustTipSeen) {
+      persist({ ...progressRef.current, bustTipSeen: true })
+    }
+  }, [persist])
 
   const answerMath = useCallback(
     (choice: number) => {

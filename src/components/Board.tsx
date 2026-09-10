@@ -122,8 +122,8 @@ function Brick({
           <torusGeometry args={[CELL * 0.48, 0.055, 8, 28]} />
           <meshStandardMaterial
             ref={ring}
-            color="#ffe08a"
-            emissive="#ffe08a"
+            color="#ffe600"
+            emissive="#ff4fd8"
             emissiveIntensity={0.7}
             transparent
             opacity={0.75}
@@ -142,8 +142,8 @@ function Brick({
             <circleGeometry args={[0.22, 24]} />
             <meshStandardMaterial
               color="#fff8e7"
-              emissive="#ffe08a"
-              emissiveIntensity={0.75}
+              emissive="#ffe600"
+              emissiveIntensity={0.85}
               roughness={0.35}
             />
           </mesh>
@@ -160,15 +160,15 @@ function MathGlyph() {
     <group position={[0, 0, 0.02]} scale={0.78}>
       <mesh position={[0, 0.12, 0]}>
         <boxGeometry args={[0.08, 0.08, 0.04]} />
-        <meshBasicMaterial color="#8b6cff" />
+        <meshBasicMaterial color="#ff4fd8" />
       </mesh>
       <mesh position={[0, 0, 0]} rotation={[0, 0, -0.5]}>
         <boxGeometry args={[0.28, 0.07, 0.04]} />
-        <meshBasicMaterial color="#8b6cff" />
+        <meshBasicMaterial color="#ff4fd8" />
       </mesh>
       <mesh position={[0, -0.12, 0]}>
         <boxGeometry args={[0.08, 0.08, 0.04]} />
-        <meshBasicMaterial color="#8b6cff" />
+        <meshBasicMaterial color="#ff4fd8" />
       </mesh>
     </group>
   )
@@ -286,7 +286,7 @@ function ClearBurst({ active }: { active: boolean }) {
   return (
     <mesh ref={ref} position={[0, 0, 0.85]} rotation={[0, 0, 0]}>
       <planeGeometry args={[BOARD_W + 0.8, BOARD_H + 0.8]} />
-      <meshBasicMaterial color="#9aeee6" transparent opacity={0.22} depthWrite={false} />
+      <meshBasicMaterial color="#2efff0" transparent opacity={0.22} depthWrite={false} />
     </mesh>
   )
 }
@@ -414,7 +414,7 @@ function SparkFlash({ cells }: { cells: ClusterCell[] }) {
   return (
     <mesh ref={ref} position={center.toArray()}>
       <circleGeometry args={[0.6, 28]} />
-      <meshBasicMaterial color="#fff4a8" transparent opacity={0.5} depthWrite={false} />
+      <meshBasicMaterial color="#ffe600" transparent opacity={0.5} depthWrite={false} />
     </mesh>
   )
 }
@@ -424,10 +424,11 @@ function SparkFlash({ cells }: { cells: ClusterCell[] }) {
  * not a bulky full wooden box. Light floor + back for iso depth.
  */
 function SideBoards() {
-  // Soft pastel candy rails (lavender / lilac) instead of dark wood
-  const wood = '#d4b8f5'
-  const woodHi = '#e8d6ff'
-  const woodEdge = '#b89ae0'
+  // Lisa Frank folder chrome — hot pink / purple / teal / neon yellow rails
+  const railL = '#ff4fd8'
+  const railR = '#2efff0'
+  const railHi = '#ffe600'
+  const railEdge = '#b44cff'
   const railH = BOARD_H + FLOOR_H * 0.5
   const railY = -FLOOR_H * 0.2
   const leftX = -BOARD_W / 2 - RAIL_W / 2 - 0.04
@@ -438,11 +439,11 @@ function SideBoards() {
       <mesh position={[0, -FLOOR_H * 0.15, -RAIL_D * 0.42]} receiveShadow>
         <planeGeometry args={[BOARD_W + RAIL_W * 2.4, BOARD_H + FLOOR_H + 0.6]} />
         <meshStandardMaterial
-          color="#3d2a68"
-          roughness={0.92}
-          metalness={0}
+          color="#5c0f96"
+          roughness={0.88}
+          metalness={0.05}
           transparent
-          opacity={0.42}
+          opacity={0.48}
         />
       </mesh>
 
@@ -455,18 +456,26 @@ function SideBoards() {
           receiveShadow
         >
           <meshStandardMaterial
-            color={wood}
-            roughness={0.55}
-            metalness={0.08}
+            color={railL}
+            emissive={railL}
+            emissiveIntensity={0.18}
+            roughness={0.4}
+            metalness={0.18}
           />
         </RoundedBox>
         <mesh position={[RAIL_W * 0.42, 0, 0.15]}>
           <boxGeometry args={[0.04, railH * 0.96, RAIL_D * 0.7]} />
-          <meshStandardMaterial color={woodHi} roughness={0.4} metalness={0.1} />
+          <meshStandardMaterial
+            color={railHi}
+            emissive={railHi}
+            emissiveIntensity={0.25}
+            roughness={0.35}
+            metalness={0.15}
+          />
         </mesh>
         <mesh position={[0, railH * 0.48, 0.05]}>
           <boxGeometry args={[RAIL_W * 0.9, 0.06, RAIL_D * 0.85]} />
-          <meshStandardMaterial color={woodEdge} roughness={0.5} />
+          <meshStandardMaterial color={railEdge} roughness={0.4} />
         </mesh>
       </group>
 
@@ -479,18 +488,26 @@ function SideBoards() {
           receiveShadow
         >
           <meshStandardMaterial
-            color={wood}
-            roughness={0.55}
-            metalness={0.08}
+            color={railR}
+            emissive={railR}
+            emissiveIntensity={0.18}
+            roughness={0.4}
+            metalness={0.18}
           />
         </RoundedBox>
         <mesh position={[-RAIL_W * 0.42, 0, 0.15]}>
           <boxGeometry args={[0.04, railH * 0.96, RAIL_D * 0.7]} />
-          <meshStandardMaterial color={woodHi} roughness={0.4} metalness={0.1} />
+          <meshStandardMaterial
+            color={railHi}
+            emissive={railHi}
+            emissiveIntensity={0.25}
+            roughness={0.35}
+            metalness={0.15}
+          />
         </mesh>
         <mesh position={[0, railH * 0.48, 0.05]}>
           <boxGeometry args={[RAIL_W * 0.9, 0.06, RAIL_D * 0.85]} />
-          <meshStandardMaterial color={woodEdge} roughness={0.5} />
+          <meshStandardMaterial color={railEdge} roughness={0.4} />
         </mesh>
       </group>
 
@@ -502,7 +519,13 @@ function SideBoards() {
         castShadow
         receiveShadow
       >
-        <meshStandardMaterial color={woodHi} roughness={0.6} metalness={0.05} />
+        <meshStandardMaterial
+          color="#b44cff"
+          emissive="#ff4fd8"
+          emissiveIntensity={0.12}
+          roughness={0.45}
+          metalness={0.12}
+        />
       </RoundedBox>
 
       {Array.from({ length: COLS + 1 }).map((_, i) => (
@@ -511,7 +534,7 @@ function SideBoards() {
           position={[-BOARD_W / 2 + i * STEP - GAP / 2, 0, -0.55]}
         >
           <boxGeometry args={[0.02, BOARD_H, 0.01]} />
-          <meshBasicMaterial color="#ffffff" transparent opacity={0.04} />
+          <meshBasicMaterial color="#ffe600" transparent opacity={0.07} />
         </mesh>
       ))}
     </group>
@@ -561,13 +584,13 @@ function Scene({
   return (
     <>
       <ResponsiveIsoCamera />
-      <color attach="background" args={['#2e1a55']} />
-      <ambientLight intensity={0.42} />
-      <hemisphereLight args={['#fff0fa', '#3a2868', 0.62]} />
+      <color attach="background" args={['#4a0a7a']} />
+      <ambientLight intensity={0.48} />
+      <hemisphereLight args={['#ffe6fb', '#5c0f96', 0.7]} />
       <directionalLight
         castShadow
         position={[6, 12, 14]}
-        intensity={1.25}
+        intensity={1.3}
         shadow-mapSize={[1024, 1024]}
         shadow-camera-near={1}
         shadow-camera-far={50}
@@ -576,10 +599,11 @@ function Scene({
         shadow-camera-top={16}
         shadow-camera-bottom={-16}
       />
-      <directionalLight position={[-8, 6, 4]} intensity={0.4} color="#e0d0ff" />
-      <pointLight position={[-5, 10, 8]} color="#ffc0e8" intensity={0.55} />
-      <pointLight position={[6, -2, 7]} color="#a8f5ee" intensity={0.48} />
-      <pointLight position={[0, 8, 10]} color="#ffe8a8" intensity={0.28} />
+      <directionalLight position={[-8, 6, 4]} intensity={0.48} color="#ff4fd8" />
+      <pointLight position={[-5, 10, 8]} color="#ff4fd8" intensity={0.7} />
+      <pointLight position={[6, -2, 7]} color="#2efff0" intensity={0.62} />
+      <pointLight position={[0, 8, 10]} color="#ffe600" intensity={0.42} />
+      <pointLight position={[3, 4, 9]} color="#b44cff" intensity={0.35} />
       <SideBoards />
       {bricks}
       {explosion && (

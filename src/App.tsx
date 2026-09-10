@@ -24,6 +24,9 @@ export default function App() {
     !!game.piece?.hasMath &&
     !game.piece.mathSolved
 
+  /** Side banner + control tip only until first math/bust open (localStorage). */
+  const showBustTip = mathAvailable && !game.progress.bustTipSeen
+
   const onBoardTap = () => {
     if (game.phase !== 'playing' || game.explosion) return
     // Only the active falling math piece opens division.
@@ -109,7 +112,7 @@ export default function App() {
             </Suspense>
           )}
 
-          {mathAvailable && (
+          {showBustTip && (
             <div className="bust-banner" aria-live="polite">
               <span className="bust-banner-icon">÷</span>
               <span>Tap to bust!</span>
@@ -145,7 +148,7 @@ export default function App() {
             onSoftDrop={() => game.tryMove(0, 1)}
             onHardDrop={game.hardDrop}
             onRotate={game.rotate}
-            mathHint={mathAvailable}
+            mathHint={showBustTip}
             disabled={game.phase === 'math' || !!game.explosion}
           />
         )}

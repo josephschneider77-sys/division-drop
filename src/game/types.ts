@@ -59,6 +59,8 @@ export interface Progress {
   gamesPlayed: number
   problemsSolved: number
   tipSeen: boolean
+  /** Hide “Tap to bust!” after first math open / division. */
+  bustTipSeen: boolean
   muted: boolean
 }
 

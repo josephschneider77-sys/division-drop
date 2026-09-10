@@ -12,8 +12,8 @@ export function ReadyOverlay({ progress, onStart }: ReadyProps) {
         <div className="logo-mark">÷</div>
         <h1>Division Drop</h1>
         <p className="tagline">
-          Stack emoji charms. When a piece pulses and glows, tap it to ÷ divide for a
-          bonus clear!
+          ✨ Stack emoji charms. When a piece pulses and glows, tap it to ÷ divide for a
+          rainbow bonus clear! 🦄
         </p>
         <button type="button" className="primary-btn" onClick={onStart}>
           Play

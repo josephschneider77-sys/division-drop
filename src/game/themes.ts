@@ -22,7 +22,7 @@ export const SHAPE_THEME: Record<ShapeId, CharmTheme> = {
   Z: 'pumpkin',
 }
 
-/** Stable pastel color per theme so pedestals read clearly on Android. */
+/** Stable Lisa Frank candy color per theme so pedestals read clearly on Android. */
 export const THEME_COLOR: Record<CharmTheme, Exclude<CellColor, 'empty'>> = {
   star: 'amber',
   moon: 'sky',

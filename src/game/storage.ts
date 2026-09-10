@@ -8,6 +8,7 @@ const DEFAULT: Progress = {
   gamesPlayed: 0,
   problemsSolved: 0,
   tipSeen: false,
+  bustTipSeen: false,
   muted: false,
 }
 
