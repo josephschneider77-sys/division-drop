@@ -47,10 +47,14 @@ npm run preview
 
 ## Deploy (GitHub Pages)
 
-This repo deploys the Vite `dist/` output to GitHub Pages at  
-`https://josephschneider77-sys.github.io/division-drop/`.
+Live site: https://josephschneider77-sys.github.io/division-drop/
 
-Vite `base` is set to `/division-drop/`. A GitHub Actions workflow builds on push to `main` and publishes Pages.
+Vite `base` is `/division-drop/`. Built `dist/` is published from the `gh-pages` branch (root).
+
+```bash
+npm run build
+# then publish contents of dist/ to the gh-pages branch
+```
 
 ## Controls
 
