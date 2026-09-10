@@ -165,31 +165,30 @@ button {
   min-height: 0;
   display: flex;
   align-items: stretch;
-  justify-content: center;
+  justify-content: stretch;
 }
 
 .board-wrap {
-  width: min(100%, calc((100dvh - 320px) * 8 / 18));
-  max-width: 100%;
-  aspect-ratio: 8 / 18;
+  /* Fill the playfield — camera frames the grid to this canvas size */
+  width: 100%;
+  height: 100%;
   margin: 0 auto;
-  padding: 6px;
-  border-radius: 22px;
-  background:
-    linear-gradient(160deg, rgba(255, 200, 100, 0.18), transparent 40%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.04));
-  border: 2px solid rgba(255, 255, 255, 0.2);
-  box-shadow:
-    var(--shadow),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  padding: 0;
+  border-radius: 18px;
+  background: transparent;
+  border: none;
+  box-shadow: none;
   overflow: hidden;
+  position: relative;
 }
 
 .board-canvas {
   width: 100% !important;
   height: 100% !important;
   display: block;
-  border-radius: 16px;
+  border-radius: 18px;
+  /* Canvas never intercepts touches — controls / gestures stay on the playfield */
+  pointer-events: none;
 }
 
 .board-wrap.shake {
@@ -198,10 +197,8 @@ button {
 
 .board-wrap.slowmo {
   outline: 3px solid var(--accent2);
-  outline-offset: 2px;
-  box-shadow:
-    var(--shadow),
-    0 0 28px rgba(46, 230, 214, 0.45);
+  outline-offset: -3px;
+  box-shadow: 0 0 28px rgba(46, 230, 214, 0.45);
 }
 
 @keyframes shake {
@@ -604,9 +601,6 @@ h2 {
   }
   .power-btn {
     height: 74px;
-  }
-  .board-wrap {
-    width: min(100%, 340px);
   }
 }
 

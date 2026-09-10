@@ -1,6 +1,6 @@
-import { Canvas, useFrame } from '@react-three/fiber'
+import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { RoundedBox } from '@react-three/drei'
-import { useMemo, useRef, type ReactNode } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, type ReactNode } from 'react'
 import * as THREE from 'three'
 import { COLOR_HEX, COLS, ROWS } from '../game/constants'
 import { mergeGhost } from '../game/board'
@@ -20,6 +20,8 @@ const GAP = 0.08
 const STEP = CELL + GAP
 const BOARD_W = COLS * STEP - GAP
 const BOARD_H = ROWS * STEP - GAP
+/** Extra world units of padding around the grid so bricks aren't edge-clipped. */
+const FRAME_PAD = 0.55
 
 function cellPos(x: number, y: number): [number, number, number] {
   return [
@@ -139,39 +141,71 @@ function MathGlyph() {
   )
 }
 
-function Well() {
-  const depth = 0.55
-  const wall = 0.22
-  const frameColor = '#2a1460'
-  return (
-    <group>
-      <mesh position={[0, 0, -depth]} receiveShadow>
-        <boxGeometry args={[BOARD_W + wall * 2, BOARD_H + wall * 2, 0.12]} />
-        <meshStandardMaterial color="#120628" roughness={0.85} />
-      </mesh>
-      <mesh position={[0, -BOARD_H / 2 - wall / 2, -depth / 2]} receiveShadow>
-        <boxGeometry args={[BOARD_W + wall * 2, wall, depth]} />
-        <meshStandardMaterial color={frameColor} roughness={0.6} />
-      </mesh>
-      <mesh position={[-BOARD_W / 2 - wall / 2, 0, -depth / 2]} receiveShadow>
-        <boxGeometry args={[wall, BOARD_H + wall * 2, depth]} />
-        <meshStandardMaterial color={frameColor} roughness={0.55} metalness={0.15} />
-      </mesh>
-      <mesh position={[BOARD_W / 2 + wall / 2, 0, -depth / 2]} receiveShadow>
-        <boxGeometry args={[wall, BOARD_H + wall * 2, depth]} />
-        <meshStandardMaterial color={frameColor} roughness={0.55} metalness={0.15} />
-      </mesh>
-      {Array.from({ length: COLS + 1 }).map((_, i) => (
-        <mesh
-          key={`vx-${i}`}
-          position={[-BOARD_W / 2 + i * STEP - GAP / 2, 0, -depth + 0.02]}
-        >
-          <boxGeometry args={[0.03, BOARD_H, 0.01]} />
-          <meshBasicMaterial color="#ffffff" transparent opacity={0.04} />
-        </mesh>
-      ))}
-    </group>
-  )
+/**
+ * Fit the full COLS×ROWS grid into the actual canvas with padding.
+ * Orthographic frustum tracks canvas aspect so bricks scale with viewport
+ * and never clip on phone/tablet or after orientation change.
+ */
+function ResponsiveCamera() {
+  const { camera, size } = useThree()
+
+  useLayoutEffect(() => {
+    const cam = camera as THREE.OrthographicCamera
+    if (!cam.isOrthographicCamera) return
+
+    const w = Math.max(1, size.width)
+    const h = Math.max(1, size.height)
+    const aspect = w / h
+
+    const halfW = BOARD_W / 2 + FRAME_PAD
+    const halfH = BOARD_H / 2 + FRAME_PAD
+    const boardAspect = halfW / halfH
+
+    let viewHalfW: number
+    let viewHalfH: number
+    if (aspect >= boardAspect) {
+      // Canvas wider than board — height-limited
+      viewHalfH = halfH
+      viewHalfW = halfH * aspect
+    } else {
+      // Canvas taller/narrower — width-limited
+      viewHalfW = halfW
+      viewHalfH = halfW / aspect
+    }
+
+    cam.left = -viewHalfW
+    cam.right = viewHalfW
+    cam.top = viewHalfH
+    cam.bottom = -viewHalfH
+    cam.near = 0.1
+    cam.far = 80
+    cam.position.set(0, 0, 20)
+    cam.lookAt(0, 0, 0)
+    cam.updateProjectionMatrix()
+  }, [camera, size.width, size.height])
+
+  // Also refresh on visualViewport / orientation (iOS Safari quirks)
+  useEffect(() => {
+    const refresh = () => {
+      // R3F size updates from ResizeObserver; force a paint path via invalidate
+      // by touching the camera matrix after layout settles.
+      requestAnimationFrame(() => {
+        const cam = camera as THREE.OrthographicCamera
+        if (cam.isOrthographicCamera) cam.updateProjectionMatrix()
+      })
+    }
+    window.addEventListener('orientationchange', refresh)
+    window.addEventListener('resize', refresh)
+    const vv = window.visualViewport
+    vv?.addEventListener('resize', refresh)
+    return () => {
+      window.removeEventListener('orientationchange', refresh)
+      window.removeEventListener('resize', refresh)
+      vv?.removeEventListener('resize', refresh)
+    }
+  }, [camera])
+
+  return null
 }
 
 function ClearBurst({ active }: { active: boolean }) {
@@ -190,6 +224,29 @@ function ClearBurst({ active }: { active: boolean }) {
       <planeGeometry args={[BOARD_W + 0.6, BOARD_H + 0.6]} />
       <meshBasicMaterial color="#2ee6d6" transparent opacity={0.2} />
     </mesh>
+  )
+}
+
+/** Soft open backdrop — no walls / wooden frame / well. */
+function OpenBackdrop() {
+  return (
+    <group>
+      {/* Subtle ground plane behind the stack for depth, not a box frame */}
+      <mesh position={[0, 0, -1.2]} receiveShadow>
+        <planeGeometry args={[BOARD_W + 8, BOARD_H + 8]} />
+        <meshStandardMaterial color="#120628" roughness={0.95} metalness={0} />
+      </mesh>
+      {/* Very faint column guides so kids can still sense the grid */}
+      {Array.from({ length: COLS + 1 }).map((_, i) => (
+        <mesh
+          key={`vx-${i}`}
+          position={[-BOARD_W / 2 + i * STEP - GAP / 2, 0, -0.9]}
+        >
+          <boxGeometry args={[0.02, BOARD_H, 0.01]} />
+          <meshBasicMaterial color="#ffffff" transparent opacity={0.035} />
+        </mesh>
+      ))}
+    </group>
   )
 }
 
@@ -219,6 +276,7 @@ function Scene({ view, slowMo }: { view: ViewCell[][]; slowMo?: boolean }) {
 
   return (
     <>
+      <ResponsiveCamera />
       <color attach="background" args={['#16083a']} />
       <ambientLight intensity={0.55} />
       <hemisphereLight args={['#cbb8ff', '#1a0a3e', 0.45]} />
@@ -236,7 +294,7 @@ function Scene({ view, slowMo }: { view: ViewCell[][]; slowMo?: boolean }) {
       />
       <pointLight position={[-6, 8, 8]} color="#ff6bcb" intensity={0.45} />
       <pointLight position={[5, -4, 6]} color="#2ee6d6" intensity={0.35} />
-      <Well />
+      <OpenBackdrop />
       {bricks}
       <ClearBurst active={!!slowMo} />
     </>
@@ -256,14 +314,15 @@ export default function Board({ board, piece, shake, slowMo }: Props) {
         className="board-canvas"
         shadows
         dpr={[1, 1.5]}
+        orthographic
         gl={{
           antialias: true,
           alpha: false,
           powerPreference: 'high-performance',
         }}
         camera={{
-          position: [0, -1.2, 22],
-          fov: 32,
+          position: [0, 0, 20],
+          zoom: 1,
           near: 0.1,
           far: 80,
         }}
