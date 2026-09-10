@@ -4,6 +4,18 @@ Kid-friendly falling-block PWA that practices **3rd-grade division**. Math is a 
 
 **Live:** https://josephschneider77-sys.github.io/division-drop/
 
+## Google Play Store (in progress)
+
+Free listing path is documented in [`store/PLAY_STORE.md`](store/PLAY_STORE.md).
+
+- Privacy policy: https://josephschneider77-sys.github.io/division-drop/privacy.html
+- Listing copy: [`store/listing.md`](store/listing.md)
+- Feature graphic: [`store/feature-graphic.png`](store/feature-graphic.png)
+- Package ID: `com.josephschneider77.divisiondrop`
+
+Until Play review finishes, install via Chrome **Add to Home screen** (above).
+
+
 ## Play on Android (phone or tablet)
 
 1. Open the live URL in **Chrome**.
