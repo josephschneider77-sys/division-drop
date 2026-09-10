@@ -202,6 +202,6 @@ export function dropInterval(level: number): number {
   return Math.max(180, 900 - (level - 1) * 55)
 }
 
-export const MATH_TIME_MS = 7000
+export const MATH_TIME_MS = 15000
 export const MATH_CHANCE = 0.55
 export const STORAGE_KEY = 'division-drop-v1'

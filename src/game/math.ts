@@ -119,3 +119,13 @@ export function formatProblem(p: DivisionProblem): string {
   }
   return `${p.dividend} ÷ ${p.divisor}`
 }
+
+/** Full equation (or remainder form) for teaching after a miss/timeout. */
+export function formatCorrectAnswer(p: DivisionProblem): string {
+  if (p.stretch && p.family === 'remainder') {
+    const quotient = Math.floor(p.dividend / p.divisor)
+    return `${p.dividend} ÷ ${p.divisor} = ${quotient} R ${p.answer}`
+  }
+  return `${p.dividend} ÷ ${p.divisor} = ${p.answer}`
+}
+
