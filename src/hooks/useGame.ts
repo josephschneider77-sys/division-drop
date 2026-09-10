@@ -49,6 +49,8 @@ export function useGame() {
   const [slowMo, setSlowMo] = useState(false)
   const [flashMsg, setFlashMsg] = useState<string | null>(null)
   const [explosion, setExplosion] = useState<BustExplosion | null>(null)
+  /** Show first-division tip until she taps a glowing brick this run. */
+  const [coachActive, setCoachActive] = useState(false)
 
   const phaseRef = useRef(phase)
   const pieceRef = useRef(piece)
@@ -135,6 +137,7 @@ export function useGame() {
     setProblem(null)
     setSlowMo(false)
     setExplosion(null)
+    setCoachActive(true)
     setPhase('playing')
   }, [])
 
@@ -263,7 +266,7 @@ export function useGame() {
     const prob = generateProblem(fams, statsRef.current.level >= 4)
     setProblem(prob)
     setPhase('math')
-    // Persist: after first bust opportunity, never re-show Tap-to-bust tips.
+    setCoachActive(false)
     if (!progressRef.current.bustCoachSeen) {
       persist({ ...progressRef.current, bustCoachSeen: true })
     }
@@ -491,6 +494,7 @@ export function useGame() {
     slowMo,
     flashMsg,
     explosion,
+    coachActive,
     startGame,
     tryMove,
     hardDrop,

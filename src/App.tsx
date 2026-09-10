@@ -24,8 +24,8 @@ export default function App() {
     !!game.piece?.hasMath &&
     !game.piece.mathSolved
 
-  /** Coach prompt only on the first falling division piece (until they tap it). */
-  const showBustTip = mathAvailable && !game.progress.bustCoachSeen
+  /** Coach on the first glowing ÷ brick each game until she taps it. */
+  const showBustTip = mathAvailable && game.coachActive
 
   const onBoardTap = () => {
     if (game.phase !== 'playing' || game.explosion) return
@@ -113,11 +113,11 @@ export default function App() {
           )}
 
           {showBustTip && (
-            <div className="bust-coach" aria-live="polite">
+            <div className="bust-coach" aria-live="polite" role="status">
               <span className="bust-coach-icon">÷</span>
               <div className="bust-coach-copy">
-                <strong>Tap the glowing brick!</strong>
-                <span>Solve ÷ to power-clear blocks</span>
+                <strong>This brick can break!</strong>
+                <span>Tap it, solve the division, and power-clear blocks</span>
               </div>
             </div>
           )}
