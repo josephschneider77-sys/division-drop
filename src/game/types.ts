@@ -70,6 +70,7 @@ export interface GameStats {
   lines: number
   combo: number
   problemsSolved: number
+  piecesLocked: number
 }
 
 export type GamePhase = 'ready' | 'playing' | 'paused' | 'math' | 'gameover'

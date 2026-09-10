@@ -197,9 +197,15 @@ export const FAMILY_LABELS: Record<FactFamily, string> = {
   remainder: 'Remainders',
 }
 
-/** Drop interval (ms) by level. */
+/** Level from lines cleared + pieces locked (speeds up as play goes on). */
+export function computeLevel(lines: number, piecesLocked: number): number {
+  return Math.max(1, 1 + Math.floor(lines / 5) + Math.floor(piecesLocked / 10))
+}
+
+/** Drop interval (ms) by level — starts gentle, ramps clearly, kid-safe floor. */
 export function dropInterval(level: number): number {
-  return Math.max(180, 900 - (level - 1) * 55)
+  // L1 ~1000ms → L10 ~280ms floor
+  return Math.max(280, 1000 - (level - 1) * 80)
 }
 
 export const MATH_TIME_MS = 15000

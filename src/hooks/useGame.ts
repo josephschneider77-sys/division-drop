@@ -9,7 +9,7 @@ import {
   pieceCells,
   type ClusterCell,
 } from '../game/board'
-import { dropInterval } from '../game/constants'
+import { computeLevel, dropInterval } from '../game/constants'
 import { generateProblem, unlockedFamilies } from '../game/math'
 import { resetBag, rotatePiece, spawnPiece } from '../game/pieces'
 import { loadProgress, mergeUnlocks, saveProgress } from '../game/storage'
@@ -41,6 +41,7 @@ export function useGame() {
     lines: 0,
     combo: 0,
     problemsSolved: 0,
+    piecesLocked: 0,
   })
   const [progress, setProgress] = useState<Progress>(() => loadProgress())
   const [problem, setProblem] = useState<DivisionProblem | null>(null)
@@ -130,7 +131,7 @@ export function useGame() {
     pieceRef.current = first
     setNextPiece(nxt)
     nextRef.current = nxt
-    setStats({ score: 0, level: 1, lines: 0, combo: 0, problemsSolved: 0 })
+    setStats({ score: 0, level: 1, lines: 0, combo: 0, problemsSolved: 0, piecesLocked: 0 })
     setProblem(null)
     setSlowMo(false)
     setExplosion(null)
@@ -148,17 +149,17 @@ export function useGame() {
       const s = statsRef.current
       let scoreAdd = 0
       let lines = s.lines
-      let level = s.level
       let combo = s.combo
+      const piecesLocked = s.piecesLocked + 1
+      const prevLevel = s.level
 
       if (lineResult.cleared > 0) {
         combo += 1
         scoreAdd +=
-          LINE_SCORES[lineResult.cleared] * level +
+          LINE_SCORES[lineResult.cleared] * prevLevel +
           combo * 25 +
           lineResult.mathBonus * 50
         lines += lineResult.cleared
-        level = Math.floor(lines / 8) + 1
         showFlash(
           lineResult.cleared === 1
             ? 'Nice line!'
@@ -173,12 +174,18 @@ export function useGame() {
         scoreAdd += 8
       }
 
+      const level = computeLevel(lines, piecesLocked)
+      if (level > prevLevel) {
+        showFlash(`Level ${level} — faster!`)
+      }
+
       const nextStats = {
         ...s,
         score: s.score + scoreAdd,
         lines,
         level,
         combo,
+        piecesLocked,
       }
       statsRef.current = nextStats
       setStats(nextStats)
@@ -348,13 +355,19 @@ export function useGame() {
             150 +
             cluster.cleared * 40 +
             LINE_SCORES[lines.cleared] * statsRef.current.level
+          const nextLines = statsRef.current.lines + lines.cleared
+          const nextPieces = statsRef.current.piecesLocked
+          const nextLevel = computeLevel(nextLines, nextPieces)
           const nextStats: GameStats = {
             ...statsRef.current,
             score: statsRef.current.score + bonus,
-            lines: statsRef.current.lines + lines.cleared,
-            level: Math.floor((statsRef.current.lines + lines.cleared) / 8) + 1,
+            lines: nextLines,
+            level: nextLevel,
             problemsSolved: statsRef.current.problemsSolved + 1,
             combo: statsRef.current.combo + 1,
+          }
+          if (nextLevel > statsRef.current.level) {
+            showFlash(`Level ${nextLevel} — faster!`)
           }
           statsRef.current = nextStats
           setStats(nextStats)
