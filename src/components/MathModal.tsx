@@ -80,7 +80,6 @@ export default function MathModal({
 
   const pct = Math.max(0, Math.min(100, (secsLeft / MATH_SECS) * 100))
   const urgent = !reveal && secsLeft <= 4
-  const displaySecs = Math.ceil(secsLeft)
 
   return (
     <div className="modal-backdrop" role="dialog" aria-modal="true">
@@ -89,10 +88,11 @@ export default function MathModal({
           className={`math-timer ${urgent ? 'urgent' : ''}`}
           aria-live="polite"
           aria-label={
-            reveal ? 'Showing correct answer' : `${displaySecs} seconds left`
+            reveal
+              ? 'Showing correct answer'
+              : `${Math.ceil(secsLeft)} seconds left`
           }
         >
-          <div className="math-timer-num">{reveal ? '★' : displaySecs}</div>
           <div className="math-timer-track">
             <div
               className="math-timer-fill"
