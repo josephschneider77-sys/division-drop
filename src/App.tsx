@@ -1,5 +1,4 @@
-import { useRef } from 'react'
-import Board from './components/Board'
+import { lazy, Suspense, useRef } from 'react'
 import Controls from './components/Controls'
 import HUD from './components/HUD'
 import MathModal from './components/MathModal'
@@ -10,6 +9,8 @@ import {
   ReadyOverlay,
 } from './components/Overlays'
 import { useGame } from './hooks/useGame'
+
+const Board = lazy(() => import('./components/Board'))
 
 export default function App() {
   const game = useGame()
@@ -70,12 +71,14 @@ export default function App() {
             game.phase === 'paused' ||
             game.phase === 'math' ||
             game.phase === 'gameover') && (
-            <Board
-              board={game.board}
-              piece={game.piece}
-              shake={game.shake}
-              slowMo={game.slowMo}
-            />
+            <Suspense fallback={<div className="board-wrap board-loading" />}>
+              <Board
+                board={game.board}
+                piece={game.piece}
+                shake={game.shake}
+                slowMo={game.slowMo}
+              />
+            </Suspense>
           )}
 
           {game.flashMsg && <div className="flash">{game.flashMsg}</div>}

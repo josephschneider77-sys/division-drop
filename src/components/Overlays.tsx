@@ -1,4 +1,3 @@
-import { FAMILY_LABELS } from '../game/constants'
 import type { GameStats, Progress } from '../game/types'
 
 interface ReadyProps {
@@ -13,16 +12,14 @@ export function ReadyOverlay({ progress, onStart }: ReadyProps) {
         <div className="logo-mark">÷</div>
         <h1>Division Drop</h1>
         <p className="tagline">
-          Stack colorful blocks. Tap ÷ when you see a math badge for a power-up clear!
+          Stack colorful blocks. Hit the big ÷ power button when a math piece drops
+          for a bonus clear!
         </p>
         <button type="button" className="primary-btn" onClick={onStart}>
           Play
         </button>
         <p className="overlay-meta">
-          High score {progress.highScore} · Level {progress.bestLevel}
-          <br />
-          Unlocked:{' '}
-          {progress.unlockedFamilies.map((f) => FAMILY_LABELS[f]).join(', ')}
+          High score {progress.highScore} · Best level {progress.bestLevel}
         </p>
       </div>
     </div>

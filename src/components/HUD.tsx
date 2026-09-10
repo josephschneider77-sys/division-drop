@@ -1,4 +1,4 @@
-import { COLOR_HEX, FAMILY_LABELS, SHAPES } from '../game/constants'
+import { COLOR_HEX, SHAPES } from '../game/constants'
 import type { GameStats, Piece, Progress } from '../game/types'
 
 interface Props {
@@ -62,14 +62,6 @@ export default function HUD({ stats, progress, next, onPause, onMute }: Props) {
       </div>
       <div className="hud-meta">
         <span>Best {progress.highScore}</span>
-        <span>
-          Facts:{' '}
-          {progress.unlockedFamilies
-            .slice(0, 4)
-            .map((f) => FAMILY_LABELS[f])
-            .join(' · ')}
-          {progress.unlockedFamilies.length > 4 ? '…' : ''}
-        </span>
       </div>
     </header>
   )

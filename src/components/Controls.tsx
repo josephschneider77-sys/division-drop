@@ -32,7 +32,7 @@ export default function Controls({
           ▶
         </button>
       </div>
-      <div className="control-row">
+      <div className="control-row drop-row">
         <button type="button" className="ctrl" onClick={onSoftDrop} aria-label="Soft drop">
           ▼
         </button>
@@ -44,16 +44,21 @@ export default function Controls({
         >
           ⬇
         </button>
-        <button
-          type="button"
-          className={`ctrl math ${mathAvailable ? 'lit' : ''}`}
-          onClick={onMath}
-          disabled={!mathAvailable}
-          aria-label="Solve math power-up"
-        >
-          ÷
-        </button>
       </div>
+
+      <button
+        type="button"
+        className={`power-btn ${mathAvailable ? 'lit' : ''}`}
+        onClick={onMath}
+        disabled={!mathAvailable}
+        aria-label="Division power-up"
+      >
+        <span className="power-glow" aria-hidden />
+        <span className="power-icon">÷</span>
+        <span className="power-label">
+          {mathAvailable ? 'POWER UP!' : '÷ Power'}
+        </span>
+      </button>
     </div>
   )
 }

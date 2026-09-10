@@ -261,7 +261,7 @@ export function useGame() {
 
         // Clear cluster at piece cells after a brief slow-mo
         setSlowMo(true)
-        showFlash('Math power-up! ✨')
+        showFlash('÷ POWER CLEAR! ✨')
 
         const cells = pieceCells(solved)
         const anchor = cells[Math.floor(cells.length / 2)] ?? cells[0]

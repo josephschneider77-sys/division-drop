@@ -22,10 +22,12 @@ export default function MathModal({ problem, onAnswer, onSkip }: Props) {
     <div className="modal-backdrop" role="dialog" aria-modal="true">
       <div className="modal math-modal">
         <p className="modal-kicker">
-          {problem.stretch ? 'Stretch challenge' : 'Math power-up'}
+          {problem.stretch ? 'Stretch challenge' : '÷ Power-up'}
         </p>
         <h2 className="math-question">{formatProblem(problem)}</h2>
-        <p className="modal-hint">Solve for a clear bonus — or skip and keep stacking!</p>
+        <p className="modal-hint">
+          Nail it for a punchy clear bonus — or skip and keep stacking!
+        </p>
 
         <div className="mode-toggle">
           <button
@@ -79,7 +81,7 @@ export default function MathModal({ problem, onAnswer, onSkip }: Props) {
           </div>
         )}
 
-        <button type="button" className="text-btn" onClick={onSkip}>
+        <button type="button" className="text-btn skip-btn" onClick={onSkip}>
           Skip — keep playing
         </button>
       </div>

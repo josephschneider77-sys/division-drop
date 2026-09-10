@@ -11,17 +11,17 @@ Kid-friendly falling-block PWA that practices **3rd-grade division**. Math is a 
 3. Launch from the home screen like a normal app (portrait works best).
 4. Big on-screen controls; swipe left/right on the board, tap to rotate, swipe down to drop.
 
-No accounts, no ads, no tracking. Progress (high score, level, unlocked fact families) stays in local storage on the device.
+No accounts, no ads, no tracking. Progress (high score, level, unlocked families) stays in local storage on the device.
 
 ## How math power-ups work
 
-- Some falling pieces show a yellow **÷** badge.
-- Tap the glowing **÷** button (or press Enter on a keyboard) to open a division problem.
-- **Correct answer:** satisfying cluster clear + points + a short slow-mo moment.
+- Some falling pieces glow with a **÷** badge.
+- Tap the big juicy **÷ POWER UP!** button when it lights up (or press Enter on a keyboard).
+- **Correct answer:** punchy 3D clear burst + points + a short slow-mo moment.
 - **Wrong answer:** soft fail — brief shake, piece keeps falling, game continues.
-- **Skip** anytime and keep stacking. Math is an advantage, not a gate.
+- **Skip** anytime (secondary) and keep stacking. Math is an advantage, not a gate.
 
-### Curriculum (unlocks as she plays)
+### Curriculum (unlocks behind the scenes as she plays)
 
 1. ÷2, ÷5, ÷10  
 2. ÷3, ÷4, ÷6  
@@ -30,6 +30,10 @@ No accounts, no ads, no tracking. Progress (high score, level, unlocked fact fam
 5. Optional stretch: simple remainders  
 
 v1 uses **3 multiple-choice** answers (fat-finger friendly) plus an optional on-screen number pad.
+
+## Look & feel
+
+Playfield is a **Three.js / react-three-fiber** 3D well with rounded bricks, soft shadows, and kid-friendly color lighting — tuned for mid-range Android tablets.
 
 ## Develop
 
@@ -64,7 +68,7 @@ npm run build
 | Rotate | ↻ or tap board | ↑ / W |
 | Soft drop | ▼ or swipe down | ↓ / S |
 | Hard drop | ⬇ or long swipe down | Space / X |
-| Math power-up | ÷ button | Enter |
+| Math power-up | ÷ POWER UP! button | Enter |
 | Pause | ⏸ | P / Esc |
 
 Built for Joe Schneider’s 8-year-old — cheerful, not babyish, Android-first.
