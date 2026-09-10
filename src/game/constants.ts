@@ -14,14 +14,15 @@ export const COLORS: CellColor[] = [
   'coral',
 ]
 
+/** Pastel / candy / midnight-sparkle palette (readable on Android). */
 export const COLOR_HEX: Record<Exclude<CellColor, 'empty'>, string> = {
-  cyan: '#2EE6D6',
-  pink: '#FF6BCB',
-  lime: '#A8FF4A',
-  amber: '#FFC83D',
-  violet: '#9B7BFF',
-  sky: '#5BB8FF',
-  coral: '#FF7A59',
+  cyan: '#7EF5EC',
+  pink: '#FF9AD8',
+  lime: '#C8F57A',
+  amber: '#FFD66E',
+  violet: '#C9B0FF',
+  sky: '#9AD0FF',
+  coral: '#FFA07A',
 }
 
 /** Relative cell offsets for each shape / rotation (0–3). */

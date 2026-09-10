@@ -1,3 +1,5 @@
+import type { CharmTheme } from './themes'
+
 export type CellColor =
   | 'cyan'
   | 'pink'
@@ -12,6 +14,8 @@ export interface Cell {
   color: CellColor
   hasMath: boolean
   locked: boolean
+  /** Charm theme for 3D mesh; set when a piece locks / is active. */
+  theme?: CharmTheme
 }
 
 export type ShapeId = 'O' | 'I' | 'T' | 'L' | 'J' | 'S' | 'Z' | 'Dot'

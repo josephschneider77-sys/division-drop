@@ -1,4 +1,5 @@
 import { COLOR_HEX, SHAPES } from '../game/constants'
+import { SHAPE_THEME, THEME_EMOJI } from '../game/themes'
 import type { GameStats, Piece, Progress } from '../game/types'
 
 interface Props {
@@ -13,6 +14,7 @@ export default function HUD({ stats, progress, next, onPause, onMute }: Props) {
   const rot = SHAPES[next.shape][0]
   const maxX = Math.max(...rot.map(([x]) => x))
   const maxY = Math.max(...rot.map(([, y]) => y))
+  const theme = SHAPE_THEME[next.shape]
 
   return (
     <header className="hud">
@@ -26,7 +28,7 @@ export default function HUD({ stats, progress, next, onPause, onMute }: Props) {
         <strong>{stats.level}</strong>
       </div>
       <div className="hud-block next-block">
-        <span className="label">Next</span>
+        <span className="label">Next {THEME_EMOJI[theme]}</span>
         <div
           className="mini-piece"
           style={{

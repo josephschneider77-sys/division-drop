@@ -1,5 +1,5 @@
 import { COLS, MATH_CHANCE, SHAPE_BAG, SHAPES } from './constants'
-import { randomColor } from './board'
+import { SHAPE_THEME, THEME_COLOR } from './themes'
 import type { Piece, ShapeId } from './types'
 
 function bagShuffle(): ShapeId[] {
@@ -22,12 +22,13 @@ export function spawnPiece(forceMath = false): Piece {
   const shape = nextShape()
   const rotations = SHAPES[shape]
   const width = Math.max(...rotations[0].map(([x]) => x)) + 1
+  const theme = SHAPE_THEME[shape]
   return {
     shape,
     rotation: 0,
     x: Math.floor((COLS - width) / 2),
     y: 0,
-    color: randomColor(),
+    color: THEME_COLOR[theme],
     hasMath: forceMath || Math.random() < MATH_CHANCE,
     mathSolved: false,
   }

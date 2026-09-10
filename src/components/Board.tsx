@@ -4,7 +4,9 @@ import { useEffect, useLayoutEffect, useMemo, useRef, type ReactNode } from 'rea
 import * as THREE from 'three'
 import { COLOR_HEX, COLS, ROWS } from '../game/constants'
 import { mergeGhost } from '../game/board'
+import type { CharmTheme } from '../game/themes'
 import type { Cell, Piece } from '../game/types'
+import { CharmVisual } from './Charms'
 
 interface Props {
   board: Cell[][]
@@ -41,6 +43,7 @@ function Brick({
   x,
   y,
   color,
+  theme,
   ghost,
   active,
   hasMath,
@@ -49,6 +52,7 @@ function Brick({
   x: number
   y: number
   color: Exclude<Cell['color'], 'empty'>
+  theme?: CharmTheme
   ghost?: boolean
   active?: boolean
   hasMath?: boolean
@@ -57,6 +61,7 @@ function Brick({
   const group = useRef<THREE.Group>(null)
   const mat = useRef<THREE.MeshStandardMaterial>(null)
   const base = useMemo(() => new THREE.Color(COLOR_HEX[color]), [color])
+  const charm = theme ?? 'crystal'
 
   useFrame(({ clock }) => {
     if (!group.current) return
@@ -65,69 +70,46 @@ function Brick({
     if (hasMath && !ghost) s *= 1 + Math.sin(t * 4.5) * 0.04
     if (burst) s *= 1 + Math.sin(t * 18) * 0.08
     group.current.scale.setScalar(s)
+    // Gentle idle twinkle for active charms
+    if (active && !ghost) {
+      group.current.rotation.z = Math.sin(t * 1.6) * 0.06
+    } else {
+      group.current.rotation.z = 0
+    }
     if (mat.current) {
       mat.current.emissiveIntensity = burst
         ? 0.55 + Math.sin(t * 14) * 0.25
         : hasMath && !ghost
-          ? 0.22 + Math.sin(t * 3.2) * 0.1
+          ? 0.28 + Math.sin(t * 3.2) * 0.12
           : ghost
             ? 0.08
-            : 0.06
+            : 0.1
     }
   })
 
-  const opacity = ghost ? 0.38 : 1
-
   return (
     <group ref={group} position={cellPos(x, y)}>
-      <RoundedBox
-        args={[CELL * 0.96, CELL * 0.96, BRICK_D]}
-        radius={0.16}
-        smoothness={4}
-        castShadow={!ghost}
+      {/* Soft candy pedestal (flat coin) so charms still read as grid occupants */}
+      <mesh
+        position={[0, 0, -BRICK_D * 0.22]}
+        rotation={[Math.PI / 2, 0, 0]}
         receiveShadow
+        castShadow={!ghost}
       >
+        <cylinderGeometry args={[CELL * 0.44, CELL * 0.44, BRICK_D * 0.22, 14]} />
         <meshStandardMaterial
-          ref={mat}
           color={base}
           emissive={base}
-          emissiveIntensity={ghost ? 0.08 : 0.06}
-          roughness={ghost ? 0.28 : 0.22}
-          metalness={ghost ? 0.12 : 0.18}
+          emissiveIntensity={ghost ? 0.05 : 0.04}
+          roughness={0.45}
+          metalness={0.08}
           transparent={!!ghost}
-          opacity={opacity}
-          envMapIntensity={0.8}
+          opacity={ghost ? 0.28 : 0.55}
         />
-      </RoundedBox>
-      {/* Specular “candy” highlight on the top-front bevel */}
-      {!ghost && (
-        <mesh position={[0.06, 0.22, BRICK_D * 0.28]} castShadow={false}>
-          <boxGeometry args={[CELL * 0.42, CELL * 0.1, 0.05]} />
-          <meshStandardMaterial
-            color="#ffffff"
-            transparent
-            opacity={0.32}
-            roughness={0.12}
-            metalness={0.05}
-          />
-        </mesh>
-      )}
-      {/* Ghost outline rim so translucent bricks still read as 3D cubes */}
-      {ghost && (
-        <RoundedBox
-          args={[CELL * 0.98, CELL * 0.98, BRICK_D * 1.02]}
-          radius={0.17}
-          smoothness={3}
-        >
-          <meshBasicMaterial
-            color={base}
-            transparent
-            opacity={0.22}
-            wireframe={false}
-            depthWrite={false}
-          />
-        </RoundedBox>
-      )}
+      </mesh>
+      <group position={[0, 0.02, BRICK_D * 0.08]}>
+        <CharmVisual theme={charm} color={base} ghost={ghost} matRef={mat} />
+      </group>
       {hasMath && !ghost && (
         <group position={[0, 0, BRICK_D * 0.52]}>
           <mesh>
@@ -398,10 +380,11 @@ function Scene({ view, slowMo }: { view: ViewCell[][]; slowMo?: boolean }) {
         if (cell.color === 'empty') continue
         list.push(
           <Brick
-            key={`${x}-${y}-${cell.active ? 'a' : cell.ghost ? 'g' : 'l'}-${cell.color}`}
+            key={`${x}-${y}-${cell.active ? 'a' : cell.ghost ? 'g' : 'l'}-${cell.color}-${cell.theme ?? ''}`}
             x={x}
             y={y}
             color={cell.color}
+            theme={cell.theme}
             ghost={cell.ghost && !cell.active}
             active={cell.active}
             hasMath={cell.hasMath}
@@ -434,8 +417,9 @@ function Scene({ view, slowMo }: { view: ViewCell[][]; slowMo?: boolean }) {
       />
       {/* Fill + rim so side/top faces separate from the front */}
       <directionalLight position={[-8, 6, 4]} intensity={0.35} color="#cbb8ff" />
-      <pointLight position={[-5, 10, 8]} color="#ff6bcb" intensity={0.4} />
-      <pointLight position={[6, -2, 7]} color="#2ee6d6" intensity={0.38} />
+      <pointLight position={[-5, 10, 8]} color="#ff9ad8" intensity={0.48} />
+      <pointLight position={[6, -2, 7]} color="#7ef5ec" intensity={0.42} />
+      <pointLight position={[0, 8, 10]} color="#ffd66e" intensity={0.22} />
       <SideBoards />
       {bricks}
       <ClearBurst active={!!slowMo} />

@@ -1,13 +1,19 @@
 import { COLS, ROWS, SHAPES } from './constants'
+import { SHAPE_THEME } from './themes'
 import type { Cell, CellColor, Piece } from './types'
+
+export function emptyCell(): Cell {
+  return {
+    color: 'empty',
+    hasMath: false,
+    locked: false,
+    theme: undefined,
+  }
+}
 
 export function emptyBoard(): Cell[][] {
   return Array.from({ length: ROWS }, () =>
-    Array.from({ length: COLS }, () => ({
-      color: 'empty' as const,
-      hasMath: false,
-      locked: false,
-    })),
+    Array.from({ length: COLS }, () => emptyCell()),
   )
 }
 
@@ -27,12 +33,14 @@ export function fits(board: Cell[][], piece: Piece): boolean {
 
 export function lockPiece(board: Cell[][], piece: Piece): Cell[][] {
   const next = board.map((row) => row.map((c) => ({ ...c })))
+  const theme = SHAPE_THEME[piece.shape]
   for (const { x, y } of pieceCells(piece)) {
     if (y >= 0 && y < ROWS && x >= 0 && x < COLS) {
       next[y][x] = {
         color: piece.color,
         hasMath: piece.hasMath && !piece.mathSolved,
         locked: true,
+        theme,
       }
     }
   }
@@ -56,13 +64,7 @@ export function clearFullLines(board: Cell[][]): {
     }
   }
   while (remaining.length < ROWS) {
-    remaining.unshift(
-      Array.from({ length: COLS }, () => ({
-        color: 'empty' as const,
-        hasMath: false,
-        locked: false,
-      })),
-    )
+    remaining.unshift(Array.from({ length: COLS }, () => emptyCell()))
   }
   return { board: remaining, cleared, mathBonus }
 }
@@ -87,11 +89,9 @@ export function clearMathCluster(
     const cell = next[y][x]
     if (cell.color === 'empty') continue
 
-    // Clear this cell
-    next[y][x] = { color: 'empty', hasMath: false, locked: false }
+    next[y][x] = emptyCell()
     cleared++
 
-    // Neighbors within Manhattan distance 1 of same color or any math badge nearby
     for (const [nx, ny] of [
       [x - 1, y],
       [x + 1, y],
@@ -107,17 +107,13 @@ export function clearMathCluster(
     }
   }
 
-  // Gravity: pack cells down per column
   for (let x = 0; x < COLS; x++) {
     const stack: Cell[] = []
     for (let y = ROWS - 1; y >= 0; y--) {
       if (next[y][x].color !== 'empty') stack.push(next[y][x])
     }
     for (let y = ROWS - 1; y >= 0; y--) {
-      next[y][x] =
-        stack.length > 0
-          ? stack.shift()!
-          : { color: 'empty', hasMath: false, locked: false }
+      next[y][x] = stack.length > 0 ? stack.shift()! : emptyCell()
     }
   }
 
@@ -131,7 +127,8 @@ export function mergeGhost(
   const view = board.map((row) => row.map((c) => ({ ...c })))
   if (!piece) return view
 
-  // Ghost
+  const theme = SHAPE_THEME[piece.shape]
+
   let ghost = { ...piece }
   while (fits(board, { ...ghost, y: ghost.y + 1 })) {
     ghost = { ...ghost, y: ghost.y + 1 }
@@ -140,16 +137,17 @@ export function mergeGhost(
     if (y >= 0 && y < ROWS && x >= 0 && x < COLS && view[y][x].color === 'empty') {
       ;(view[y][x] as Cell & { ghost?: boolean }).ghost = true
       view[y][x].color = piece.color
+      view[y][x].theme = theme
     }
   }
 
-  // Active piece
   for (const { x, y } of pieceCells(piece)) {
     if (y >= 0 && y < ROWS && x >= 0 && x < COLS) {
       view[y][x] = {
         color: piece.color,
         hasMath: piece.hasMath && !piece.mathSolved,
         locked: false,
+        theme,
       }
       ;(view[y][x] as Cell & { active?: boolean }).active = true
     }
