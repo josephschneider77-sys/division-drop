@@ -8,7 +8,7 @@ const DEFAULT: Progress = {
   gamesPlayed: 0,
   problemsSolved: 0,
   tipSeen: false,
-  bustTipSeen: false,
+  bustCoachSeen: false,
   muted: false,
 }
 
@@ -16,8 +16,11 @@ export function loadProgress(): Progress {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (!raw) return { ...DEFAULT }
-    const parsed = JSON.parse(raw) as Partial<Progress>
-    return { ...DEFAULT, ...parsed }
+    const parsed = JSON.parse(raw) as Partial<Progress> & {
+      bustTipSeen?: boolean
+    }
+    const { bustTipSeen: _oldBust, ...rest } = parsed
+    return { ...DEFAULT, ...rest }
   } catch {
     return { ...DEFAULT }
   }

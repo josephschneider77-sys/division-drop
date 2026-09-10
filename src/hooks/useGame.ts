@@ -264,8 +264,8 @@ export function useGame() {
     setProblem(prob)
     setPhase('math')
     // Persist: after first bust opportunity, never re-show Tap-to-bust tips.
-    if (!progressRef.current.bustTipSeen) {
-      persist({ ...progressRef.current, bustTipSeen: true })
+    if (!progressRef.current.bustCoachSeen) {
+      persist({ ...progressRef.current, bustCoachSeen: true })
     }
   }, [persist])
 

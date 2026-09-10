@@ -24,8 +24,8 @@ export default function App() {
     !!game.piece?.hasMath &&
     !game.piece.mathSolved
 
-  /** Side banner + control tip only until first math/bust open (localStorage). */
-  const showBustTip = mathAvailable && !game.progress.bustTipSeen
+  /** Coach prompt only on the first falling division piece (until they tap it). */
+  const showBustTip = mathAvailable && !game.progress.bustCoachSeen
 
   const onBoardTap = () => {
     if (game.phase !== 'playing' || game.explosion) return
@@ -113,9 +113,12 @@ export default function App() {
           )}
 
           {showBustTip && (
-            <div className="bust-banner" aria-live="polite">
-              <span className="bust-banner-icon">÷</span>
-              <span>Tap to bust!</span>
+            <div className="bust-coach" aria-live="polite">
+              <span className="bust-coach-icon">÷</span>
+              <div className="bust-coach-copy">
+                <strong>Tap the glowing brick!</strong>
+                <span>Solve ÷ to power-clear blocks</span>
+              </div>
             </div>
           )}
 

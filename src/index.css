@@ -660,54 +660,67 @@ h2 {
   background: linear-gradient(180deg, #7a1fb8, #4a0a7a);
 }
 
-/* Slim side bust prompt — left of the well, never covering the stack */
-.bust-banner {
+/* First-division coach prompt — above the well, clear and readable */
+.bust-coach {
   position: absolute;
-  top: 22%;
-  left: 4px;
-  right: auto;
-  transform: none;
-  z-index: 3;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 4;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
-  justify-content: center;
-  gap: 6px;
-  width: 64px;
-  padding: 12px 8px;
+  gap: 10px;
+  max-width: min(92%, 320px);
+  padding: 10px 14px;
   border-radius: 18px;
-  font-weight: 900;
-  font-size: 0.72rem;
-  line-height: 1.15;
-  text-align: center;
   color: #5c0f96;
-  background: linear-gradient(180deg, #ffe600, #ff9aef);
-  border: 2px solid rgba(255, 255, 255, 0.85);
-  box-shadow: 0 6px 18px rgba(255, 79, 216, 0.45), 0 0 0 2px rgba(46, 255, 240, 0.4);
+  background: linear-gradient(90deg, #ffe600, #ff9aef 55%, #2efff0);
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 8px 22px rgba(255, 79, 216, 0.5), 0 0 0 2px rgba(46, 255, 240, 0.35);
   pointer-events: none;
-  white-space: normal;
   animation: bustPulse 1.15s ease-in-out infinite;
 }
 
-.bust-banner-icon {
+.bust-coach-icon {
+  flex-shrink: 0;
   display: grid;
   place-items: center;
-  width: 30px;
-  height: 30px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   background: linear-gradient(145deg, #ff4fd8, #b44cff);
   color: #fff8e7;
-  font-size: 1.05rem;
+  font-size: 1.2rem;
   font-weight: 900;
   box-shadow: 0 2px 0 #7a1fb8, 0 0 8px rgba(255, 79, 216, 0.55);
+}
+
+.bust-coach-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  line-height: 1.2;
+  text-align: left;
+}
+
+.bust-coach-copy strong {
+  font-size: 0.95rem;
+  font-weight: 900;
+}
+
+.bust-coach-copy span {
+  font-size: 0.78rem;
+  font-weight: 700;
+  opacity: 0.92;
 }
 
 @keyframes bustPulse {
   0%,
   100% {
-    transform: scale(1);
+    transform: translateX(-50%) scale(1);
   }
   50% {
-    transform: scale(1.05);
+    transform: translateX(-50%) scale(1.04);
   }
 }
