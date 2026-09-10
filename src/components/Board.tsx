@@ -30,8 +30,8 @@ const BRICK_D = 0.95
 const RAIL_W = 0.38
 const RAIL_D = 1.35
 const FLOOR_H = 0.32
-/** Extra pad in camera framing — keep tight so playfield fills the canvas. */
-const FRAME_MARGIN = 0.04
+/** Extra pad in camera framing — near-zero so playfield fills the canvas tightly. */
+const FRAME_MARGIN = 0.0
 
 function cellPos(x: number, y: number): [number, number, number] {
   return [
@@ -122,8 +122,8 @@ function Brick({
           <torusGeometry args={[CELL * 0.48, 0.055, 8, 28]} />
           <meshStandardMaterial
             ref={ring}
-            color="#ffc83d"
-            emissive="#ffc83d"
+            color="#ffe08a"
+            emissive="#ffe08a"
             emissiveIntensity={0.7}
             transparent
             opacity={0.75}
@@ -142,8 +142,8 @@ function Brick({
             <circleGeometry args={[0.22, 24]} />
             <meshStandardMaterial
               color="#fff8e7"
-              emissive="#ffc83d"
-              emissiveIntensity={0.85}
+              emissive="#ffe08a"
+              emissiveIntensity={0.75}
               roughness={0.35}
             />
           </mesh>
@@ -160,24 +160,24 @@ function MathGlyph() {
     <group position={[0, 0, 0.02]} scale={0.78}>
       <mesh position={[0, 0.12, 0]}>
         <boxGeometry args={[0.08, 0.08, 0.04]} />
-        <meshBasicMaterial color="#5b2cff" />
+        <meshBasicMaterial color="#8b6cff" />
       </mesh>
       <mesh position={[0, 0, 0]} rotation={[0, 0, -0.5]}>
         <boxGeometry args={[0.28, 0.07, 0.04]} />
-        <meshBasicMaterial color="#5b2cff" />
+        <meshBasicMaterial color="#8b6cff" />
       </mesh>
       <mesh position={[0, -0.12, 0]}>
         <boxGeometry args={[0.08, 0.08, 0.04]} />
-        <meshBasicMaterial color="#5b2cff" />
+        <meshBasicMaterial color="#8b6cff" />
       </mesh>
     </group>
   )
 }
 
 /**
- * Mild orthographic 3D camera — mostly face-on so the tall stack reads
- * clearly, with a light elevation + side offset so brick tops/sides and
- * left/right rails still show. Frames the full grid on any aspect.
+ * Soft isometric orthographic camera — more depth than face-on, but milder
+ * than the earlier steep iso so the tall stack still reads clearly on tablets.
+ * Frames the full grid tightly on any aspect.
  */
 function ResponsiveIsoCamera() {
   const { camera, size } = useThree()
@@ -191,13 +191,14 @@ function ResponsiveIsoCamera() {
     const aspect = w / h
 
     const dist = 36
-    cam.position.set(dist * 0.22, dist * 0.16, dist * 0.96)
+    // Mid iso: between face-on (0.22/0.16/0.96) and steep (0.55/0.42/0.78)
+    cam.position.set(dist * 0.36, dist * 0.27, dist * 0.89)
     cam.up.set(0, 1, 0)
-    cam.lookAt(0, -0.1, 0)
+    cam.lookAt(0, -0.16, 0)
     cam.updateMatrixWorld(true)
 
-    const halfW = BOARD_W / 2 + RAIL_W + 0.15
-    const halfH = BOARD_H / 2 + FLOOR_H + 0.25
+    const halfW = BOARD_W / 2 + RAIL_W + 0.06
+    const halfH = BOARD_H / 2 + FLOOR_H + 0.1
     const zNear = -RAIL_D * 0.55
     const zFar = BRICK_D * 0.65
     const corners = [
@@ -285,7 +286,7 @@ function ClearBurst({ active }: { active: boolean }) {
   return (
     <mesh ref={ref} position={[0, 0, 0.85]} rotation={[0, 0, 0]}>
       <planeGeometry args={[BOARD_W + 0.8, BOARD_H + 0.8]} />
-      <meshBasicMaterial color="#2ee6d6" transparent opacity={0.2} depthWrite={false} />
+      <meshBasicMaterial color="#9aeee6" transparent opacity={0.22} depthWrite={false} />
     </mesh>
   )
 }
@@ -423,9 +424,10 @@ function SparkFlash({ cells }: { cells: ClusterCell[] }) {
  * not a bulky full wooden box. Light floor + back for iso depth.
  */
 function SideBoards() {
-  const wood = '#5c3d2e'
-  const woodHi = '#7a5540'
-  const woodEdge = '#3d261c'
+  // Soft pastel candy rails (lavender / lilac) instead of dark wood
+  const wood = '#d4b8f5'
+  const woodHi = '#e8d6ff'
+  const woodEdge = '#b89ae0'
   const railH = BOARD_H + FLOOR_H * 0.5
   const railY = -FLOOR_H * 0.2
   const leftX = -BOARD_W / 2 - RAIL_W / 2 - 0.04
@@ -436,11 +438,11 @@ function SideBoards() {
       <mesh position={[0, -FLOOR_H * 0.15, -RAIL_D * 0.42]} receiveShadow>
         <planeGeometry args={[BOARD_W + RAIL_W * 2.4, BOARD_H + FLOOR_H + 0.6]} />
         <meshStandardMaterial
-          color="#1a0a38"
+          color="#3d2a68"
           roughness={0.92}
           metalness={0}
           transparent
-          opacity={0.55}
+          opacity={0.42}
         />
       </mesh>
 
@@ -559,9 +561,9 @@ function Scene({
   return (
     <>
       <ResponsiveIsoCamera />
-      <color attach="background" args={['#16083a']} />
+      <color attach="background" args={['#2e1a55']} />
       <ambientLight intensity={0.42} />
-      <hemisphereLight args={['#e8dcff', '#1a0a3e', 0.55]} />
+      <hemisphereLight args={['#fff0fa', '#3a2868', 0.62]} />
       <directionalLight
         castShadow
         position={[6, 12, 14]}
@@ -574,10 +576,10 @@ function Scene({
         shadow-camera-top={16}
         shadow-camera-bottom={-16}
       />
-      <directionalLight position={[-8, 6, 4]} intensity={0.35} color="#cbb8ff" />
-      <pointLight position={[-5, 10, 8]} color="#ff9ad8" intensity={0.48} />
-      <pointLight position={[6, -2, 7]} color="#7ef5ec" intensity={0.42} />
-      <pointLight position={[0, 8, 10]} color="#ffd66e" intensity={0.22} />
+      <directionalLight position={[-8, 6, 4]} intensity={0.4} color="#e0d0ff" />
+      <pointLight position={[-5, 10, 8]} color="#ffc0e8" intensity={0.55} />
+      <pointLight position={[6, -2, 7]} color="#a8f5ee" intensity={0.48} />
+      <pointLight position={[0, 8, 10]} color="#ffe8a8" intensity={0.28} />
       <SideBoards />
       {bricks}
       {explosion && (

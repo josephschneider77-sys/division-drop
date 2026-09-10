@@ -48,10 +48,10 @@ export function CharmVisual({ theme, color, ghost }: CharmVisualProps) {
   const emoji = THEME_EMOJI[theme]
   const map = useMemo(() => emojiTexture(emoji), [emoji])
   const bodyColor = useMemo(
-    () => (color ? color.clone() : new THREE.Color('#ffd6ef')),
+    () => (color ? color.clone().lerp(new THREE.Color('#ffffff'), 0.12) : new THREE.Color('#ffe6f4')),
     [color],
   )
-  const hiColor = useMemo(() => bodyColor.clone().lerp(new THREE.Color('#ffffff'), 0.35), [bodyColor])
+  const hiColor = useMemo(() => bodyColor.clone().lerp(new THREE.Color('#ffffff'), 0.48), [bodyColor])
   const group = useRef<THREE.Group>(null)
 
   useFrame(({ clock }) => {
