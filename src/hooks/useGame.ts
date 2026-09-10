@@ -13,6 +13,15 @@ import { computeLevel, dropInterval } from '../game/constants'
 import { generateProblem, unlockedFamilies } from '../game/math'
 import { resetBag, rotatePiece, spawnPiece } from '../game/pieces'
 import { loadProgress, mergeUnlocks, saveProgress } from '../game/storage'
+import {
+  pauseWitchyBg,
+  playBust,
+  playDivOpportunity,
+  setMuted,
+  startWitchyBg,
+  stopWitchyBg,
+  unlockAudio,
+} from '../audio/sounds'
 import type {
   Cell,
   DivisionProblem,
@@ -120,9 +129,14 @@ export function useGame() {
     }
     setPiece(incoming)
     pieceRef.current = incoming
+    if (incoming.hasMath && !incoming.mathSolved) {
+      playDivOpportunity()
+    }
   }, [persist])
 
   const startGame = useCallback(() => {
+    unlockAudio()
+    setMuted(progressRef.current.muted)
     resetBag()
     const b = emptyBoard()
     setBoard(b)
@@ -139,6 +153,8 @@ export function useGame() {
     setExplosion(null)
     setCoachActive(true)
     setPhase('playing')
+    if (!progressRef.current.muted) startWitchyBg()
+    if (first.hasMath) playDivOpportunity()
   }, [])
 
   const lockAndContinue = useCallback(
@@ -321,6 +337,7 @@ export function useGame() {
         )
 
         explodeId.current += 1
+        playBust()
         setExplosion({ id: explodeId.current, cells: clusterCells })
         setSlowMo(true)
         showFlash('÷ POWER CLEAR! ✨')
@@ -412,11 +429,26 @@ export function useGame() {
   const toggleMute = useCallback(() => {
     const next = { ...progressRef.current, muted: !progressRef.current.muted }
     persist(next)
+    setMuted(next.muted)
+    if (next.muted) pauseWitchyBg()
+    else if (phaseRef.current === 'playing') startWitchyBg()
   }, [persist])
 
   const dismissTip = useCallback(() => {
     persist({ ...progressRef.current, tipSeen: true })
   }, [persist])
+
+  // Background music follows play / pause / mute
+  useEffect(() => {
+    setMuted(progress.muted)
+    if (progress.muted) {
+      pauseWitchyBg()
+      return
+    }
+    if (phase === 'playing') startWitchyBg()
+    else if (phase === 'paused' || phase === 'math') pauseWitchyBg()
+    else stopWitchyBg()
+  }, [phase, progress.muted])
 
   // Gravity tick — freeze while explosion plays
   useEffect(() => {
