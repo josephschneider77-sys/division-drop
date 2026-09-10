@@ -33,7 +33,7 @@ v1 uses **3 multiple-choice** answers (fat-finger friendly) plus an optional on-
 
 ## Look & feel
 
-Playfield is a **Three.js / react-three-fiber** 3D well with rounded bricks, soft shadows, and kid-friendly color lighting — tuned for mid-range Android tablets.
+Playfield is a **Three.js / react-three-fiber** orthographic isometric stack: beveled bricks with distinct lit faces, slim left/right side boards marking the move edges, and a responsive camera that frames the full grid on phone/tablet.
 
 ## Develop
 
