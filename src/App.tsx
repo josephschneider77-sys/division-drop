@@ -159,6 +159,7 @@ export default function App() {
           problem={game.problem}
           onAnswer={game.answerMath}
           onSkip={game.skipMath}
+          onTimeout={() => game.softFailMath("Time's up — keep going!")}
         />
       )}
 

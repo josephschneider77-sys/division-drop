@@ -18,8 +18,10 @@ No accounts, no ads, no tracking. Progress (high score, level, unlocked families
 - Some **actively falling** pieces **pulse and glow** with a **÷** badge (locked stack cells are never tappable for math).
 - A slim **“Tap to bust! ÷”** side panel sits to the **left of the well** on the **first** math piece only (persisted in localStorage; never covers the stack).
 - **Tap the board** (or press Enter) to open a division question — only while that math piece is still falling.
+- **Answer on the number pad only** (no multiple-choice) — quotient, or remainder in stretch mode.
+- **~7 second countdown** (big number + rainbow bar) starts when the math modal opens.
 - **Correct answer:** emoji chunks explode apart, then clear + points + a short slow-mo moment.
-- **Wrong answer:** soft fail — brief shake, piece keeps falling, game continues.
+- **Wrong answer or time out:** soft fail — brief shake, modal closes, piece keeps falling, no bust.
 - **Skip** anytime (secondary) and keep stacking. Math is an advantage, not a gate.
 
 ### Curriculum (unlocks behind the scenes as she plays)
@@ -30,7 +32,7 @@ No accounts, no ads, no tracking. Progress (high score, level, unlocked families
 4. 2-digit ÷ 1-digit (no remainder)  
 5. Optional stretch: simple remainders  
 
-v1 uses **3 multiple-choice** answers (fat-finger friendly) plus an optional on-screen number pad.
+Answers are **number-pad only** with a visible **7s** timer — wrong or timeout is a soft fail.
 
 ## Look & feel
 

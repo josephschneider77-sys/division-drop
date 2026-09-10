@@ -262,6 +262,17 @@ export function useGame() {
     }
   }, [persist])
 
+  const softFailMath = useCallback(
+    (msg = 'Oops — keep going!') => {
+      setShake(true)
+      showFlash(msg)
+      window.setTimeout(() => setShake(false), 400)
+      setProblem(null)
+      setPhase('playing')
+    },
+    [showFlash],
+  )
+
   const answerMath = useCallback(
     (choice: number) => {
       const prob = problem
@@ -366,15 +377,10 @@ export function useGame() {
           spawnNext()
         }, BUST_EXPLODE_MS)
       } else {
-        // Soft fail
-        setShake(true)
-        showFlash('Oops — keep going!')
-        window.setTimeout(() => setShake(false), 400)
-        setProblem(null)
-        setPhase('playing')
+        softFailMath()
       }
     },
-    [problem, persist, showFlash, spawnNext],
+    [problem, persist, showFlash, spawnNext, softFailMath],
   )
 
   const skipMath = useCallback(() => {
@@ -478,6 +484,7 @@ export function useGame() {
     rotate,
     openMath,
     answerMath,
+    softFailMath,
     skipMath,
     togglePause,
     toggleMute,

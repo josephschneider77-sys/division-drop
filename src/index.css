@@ -487,47 +487,64 @@ h2 {
   color: var(--accent2);
 }
 
-.mode-toggle {
-  display: flex;
-  gap: 8px;
-  justify-content: center;
-  margin-bottom: 12px;
+.math-timer {
+  margin: 0 0 12px;
 }
 
-.chip {
-  padding: 8px 14px;
-  border-radius: 999px;
-  background: var(--panel);
-  font-size: 0.9rem;
-  border: 1px solid rgba(255, 255, 255, 0.25);
-}
-
-.chip.active {
-  background: var(--accent2);
-  color: #062824;
-  box-shadow: 0 0 10px rgba(46, 255, 240, 0.55);
-}
-
-.choice-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 10px;
-  margin-bottom: 12px;
-}
-
-.choice-btn {
-  padding: 16px;
-  border-radius: 16px;
-  font-size: 1.6rem;
+.math-timer-num {
+  font-size: 2.6rem;
   font-weight: 900;
-  background: linear-gradient(180deg, #ff7ae8, #b44cff);
-  box-shadow: 0 5px 0 #7a1fb8, 0 0 12px rgba(255, 79, 216, 0.4);
-  border: 2px solid rgba(255, 230, 0, 0.45);
+  line-height: 1;
+  margin: 0 0 8px;
+  color: #ffe600;
+  text-shadow:
+    0 0 10px rgba(255, 230, 0, 0.85),
+    0 0 22px rgba(255, 79, 216, 0.65),
+    0 3px 0 #c9a000;
+  font-variant-numeric: tabular-nums;
 }
 
-.choice-btn:active {
-  transform: translateY(2px);
-  box-shadow: 0 3px 0 #7a1fb8;
+.math-timer.urgent .math-timer-num {
+  color: #ff4fd8;
+  text-shadow:
+    0 0 12px rgba(255, 79, 216, 0.95),
+    0 0 24px rgba(46, 255, 240, 0.7),
+    0 3px 0 #7a1fb8;
+  animation: timer-pulse 0.45s ease-in-out infinite alternate;
+}
+
+.math-timer-track {
+  height: 16px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.35);
+  border: 2px solid rgba(255, 230, 0, 0.65);
+  box-shadow: 0 0 12px rgba(46, 255, 240, 0.35), inset 0 2px 4px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+}
+
+.math-timer-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #2efff0, #ffe600, #ff4fd8, #b44cff);
+  background-size: 200% 100%;
+  box-shadow: 0 0 14px rgba(255, 79, 216, 0.55);
+  transition: width 0.05s linear;
+  animation: timer-shine 1.4s linear infinite;
+}
+
+.math-timer.urgent .math-timer-fill {
+  background: linear-gradient(90deg, #ff4fd8, #ffe600, #ff4fd8);
+  animation: timer-shine 0.55s linear infinite;
+}
+
+@keyframes timer-pulse {
+  from { transform: scale(1); }
+  to { transform: scale(1.08); }
+}
+
+@keyframes timer-shine {
+  from { background-position: 0% 50%; }
+  to { background-position: 200% 50%; }
 }
 
 .pad-display {
