@@ -12,6 +12,10 @@ function bagShuffle(): ShapeId[] {
 }
 
 let bag: ShapeId[] = []
+/** Consecutive non-math spawns; force math after a short dry streak. */
+let dryStreak = 0
+const MAX_DRY = 3
+
 export function nextShape(): ShapeId {
   if (bag.length === 0) bag = bagShuffle()
   return bag.pop()!
@@ -22,7 +26,9 @@ export function spawnPiece(forceMath = false): Piece {
   const rotations = SHAPES[shape]
   const width = Math.max(...rotations[0].map(([x]) => x)) + 1
   const theme = SHAPE_THEME[shape]
-  const hasMath = forceMath || Math.random() < MATH_CHANCE
+  const hasMath =
+    forceMath || dryStreak >= MAX_DRY || Math.random() < MATH_CHANCE
+  dryStreak = hasMath ? 0 : dryStreak + 1
   return {
     shape,
     rotation: 0,
@@ -41,4 +47,5 @@ export function rotatePiece(piece: Piece): Piece {
 
 export function resetBag(): void {
   bag = []
+  dryStreak = 0
 }
