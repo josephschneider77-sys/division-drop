@@ -2,6 +2,9 @@
 
 const BASE = `${import.meta.env.BASE_URL}sounds/`
 
+/** Highest integer with a recorded clip in vo/numbers/n-XXX.mp3 */
+const NUMBER_VO_MAX = 105
+
 /** Joe's recorded divide / division-opportunity lines. */
 const DIVIDE_VO = [
   'vo/divide-1.mp3',
@@ -79,6 +82,53 @@ function playUrl(file: string, volume: number): void {
   void a.play().catch(() => {
     /* ignore */
   })
+}
+
+function playUrlAsync(file: string, volume: number): Promise<void> {
+  return new Promise((resolve) => {
+    if (!unlocked || muted) {
+      resolve()
+      return
+    }
+    const a = new Audio(`${BASE}${file}`)
+    a.volume = volume
+    const done = () => resolve()
+    a.addEventListener('ended', done, { once: true })
+    a.addEventListener('error', done, { once: true })
+    void a.play().catch(done)
+  })
+}
+
+function numberVoPath(n: number): string | null {
+  if (!Number.isInteger(n) || n < 0 || n > NUMBER_VO_MAX) return null
+  return `vo/numbers/n-${String(n).padStart(3, '0')}.mp3`
+}
+
+/**
+ * Speak a correct equation: "12 divided by 4 equals 3".
+ * Uses Joe's number bank (0–105) + operators. Skips silently if any
+ * number is out of range or the problem is a remainder stretch.
+ */
+export function playEquationVo(problem: {
+  dividend: number
+  divisor: number
+  answer: number
+  family: string
+  stretch?: boolean
+}): void {
+  if (problem.family === 'remainder' || problem.stretch) return
+  const dividendPath = numberVoPath(problem.dividend)
+  const divisorPath = numberVoPath(problem.divisor)
+  const answerPath = numberVoPath(problem.answer)
+  if (!dividendPath || !divisorPath || !answerPath) return
+
+  void (async () => {
+    await playUrlAsync(dividendPath, 1)
+    await playUrlAsync('vo/operators/divided-by.mp3', 1)
+    await playUrlAsync(divisorPath, 1)
+    await playUrlAsync('vo/operators/equals.mp3', 1)
+    await playUrlAsync(answerPath, 1)
+  })()
 }
 
 /** Glowing ÷ brick appeared — random VO line from Joe. */
