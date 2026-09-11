@@ -12,8 +12,8 @@ interface Props {
 }
 
 const MATH_SECS = MATH_TIME_MS / 1000
-/** Brief pause so the kid can see the correct answer before soft-fail. */
-const ANSWER_REVEAL_MS = 1800
+/** Extra beat after equation VO so the kid can still see the answer. */
+const ANSWER_REVEAL_PAD_MS = 400
 
 export default function MathModal({
   problem,
@@ -37,14 +37,14 @@ export default function MathModal({
     const equation = formatCorrectAnswer(problem)
     setReveal(equation)
     doneRef.current = true
-    playEquationVo(problem)
-    window.setTimeout(() => {
-      const msg =
-        reason === 'timeout'
-          ? `Time's up! ${equation}`
-          : `Oops! ${equation}`
-      onSoftFail(msg)
-    }, ANSWER_REVEAL_MS)
+    const msg =
+      reason === 'timeout'
+        ? `Time's up! ${equation}`
+        : `Oops! ${equation}`
+    // Hold the answer window until the spoken equation finishes.
+    void playEquationVo(problem).finally(() => {
+      window.setTimeout(() => onSoftFail(msg), ANSWER_REVEAL_PAD_MS)
+    })
   }
 
   useEffect(() => {
