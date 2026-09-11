@@ -2,9 +2,6 @@
 
 const BASE = `${import.meta.env.BASE_URL}sounds/`
 
-/** Highest integer with a recorded clip in vo/numbers/n-XXX.mp3 */
-const NUMBER_VO_MAX = 105
-
 /** Joe's recorded divide / division-opportunity lines. */
 const DIVIDE_VO = [
   'vo/divide-1.mp3',
@@ -82,59 +79,6 @@ function playUrl(file: string, volume: number): void {
   void a.play().catch(() => {
     /* ignore */
   })
-}
-
-function playUrlAsync(
-  file: string,
-  volume: number,
-  playbackRate = 1,
-): Promise<void> {
-  return new Promise((resolve) => {
-    if (!unlocked || muted) {
-      resolve()
-      return
-    }
-    const a = new Audio(`${BASE}${file}`)
-    a.volume = volume
-    a.playbackRate = playbackRate
-    const done = () => resolve()
-    a.addEventListener('ended', done, { once: true })
-    a.addEventListener('error', done, { once: true })
-    void a.play().catch(done)
-  })
-}
-
-function numberVoPath(n: number): string | null {
-  if (!Number.isInteger(n) || n < 0 || n > NUMBER_VO_MAX) return null
-  return `vo/numbers/n-${String(n).padStart(3, '0')}.mp3`
-}
-
-/**
- * Speak a correct equation. Resolves when playback finishes (or immediately
- * if skipped). Rate ~2× so a full line usually fits a short reveal beat.
- */
-export function playEquationVo(problem: {
-  dividend: number
-  divisor: number
-  answer: number
-  family: string
-  stretch?: boolean
-}): Promise<void> {
-  if (problem.family === 'remainder' || problem.stretch) return Promise.resolve()
-  const dividendPath = numberVoPath(problem.dividend)
-  const divisorPath = numberVoPath(problem.divisor)
-  const answerPath = numberVoPath(problem.answer)
-  if (!dividendPath || !divisorPath || !answerPath) return Promise.resolve()
-
-  // Snappy enough to finish before a short reveal; modal also awaits this.
-  const rate = 2
-  return (async () => {
-    await playUrlAsync(dividendPath, 1, rate)
-    await playUrlAsync('vo/operators/divided-by.mp3', 1, rate)
-    await playUrlAsync(divisorPath, 1, rate)
-    await playUrlAsync('vo/operators/equals.mp3', 1, rate)
-    await playUrlAsync(answerPath, 1, rate)
-  })()
 }
 
 /** Glowing ÷ brick appeared — random VO line from Joe. */
