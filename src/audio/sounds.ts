@@ -84,7 +84,11 @@ function playUrl(file: string, volume: number): void {
   })
 }
 
-function playUrlAsync(file: string, volume: number): Promise<void> {
+function playUrlAsync(
+  file: string,
+  volume: number,
+  playbackRate = 1,
+): Promise<void> {
   return new Promise((resolve) => {
     if (!unlocked || muted) {
       resolve()
@@ -92,6 +96,7 @@ function playUrlAsync(file: string, volume: number): Promise<void> {
     }
     const a = new Audio(`${BASE}${file}`)
     a.volume = volume
+    a.playbackRate = playbackRate
     const done = () => resolve()
     a.addEventListener('ended', done, { once: true })
     a.addEventListener('error', done, { once: true })
@@ -122,12 +127,14 @@ export function playEquationVo(problem: {
   const answerPath = numberVoPath(problem.answer)
   if (!dividendPath || !divisorPath || !answerPath) return
 
+  // ~70% faster than recorded pace (kid-game snappy).
+  const rate = 1.7
   void (async () => {
-    await playUrlAsync(dividendPath, 1)
-    await playUrlAsync('vo/operators/divided-by.mp3', 1)
-    await playUrlAsync(divisorPath, 1)
-    await playUrlAsync('vo/operators/equals.mp3', 1)
-    await playUrlAsync(answerPath, 1)
+    await playUrlAsync(dividendPath, 1, rate)
+    await playUrlAsync('vo/operators/divided-by.mp3', 1, rate)
+    await playUrlAsync(divisorPath, 1, rate)
+    await playUrlAsync('vo/operators/equals.mp3', 1, rate)
+    await playUrlAsync(answerPath, 1, rate)
   })()
 }
 
