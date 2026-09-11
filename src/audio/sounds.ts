@@ -110,9 +110,8 @@ function numberVoPath(n: number): string | null {
 }
 
 /**
- * Speak a correct equation: "12 divided by 4 equals 3".
- * Uses Joe's number bank (0–105) + operators. Skips silently if any
- * number is out of range or the problem is a remainder stretch.
+ * Speak a correct equation. Resolves when playback finishes (or immediately
+ * if skipped). Rate ~2× so a full line usually fits a short reveal beat.
  */
 export function playEquationVo(problem: {
   dividend: number
@@ -120,16 +119,16 @@ export function playEquationVo(problem: {
   answer: number
   family: string
   stretch?: boolean
-}): void {
-  if (problem.family === 'remainder' || problem.stretch) return
+}): Promise<void> {
+  if (problem.family === 'remainder' || problem.stretch) return Promise.resolve()
   const dividendPath = numberVoPath(problem.dividend)
   const divisorPath = numberVoPath(problem.divisor)
   const answerPath = numberVoPath(problem.answer)
-  if (!dividendPath || !divisorPath || !answerPath) return
+  if (!dividendPath || !divisorPath || !answerPath) return Promise.resolve()
 
-  // 50% faster than recorded pace (kid-game snappy).
-  const rate = 1.5
-  void (async () => {
+  // Snappy enough to finish before a short reveal; modal also awaits this.
+  const rate = 2
+  return (async () => {
     await playUrlAsync(dividendPath, 1, rate)
     await playUrlAsync('vo/operators/divided-by.mp3', 1, rate)
     await playUrlAsync(divisorPath, 1, rate)
