@@ -16,7 +16,6 @@ import { loadProgress, mergeUnlocks, saveProgress } from '../game/storage'
 import {
   playBust,
   playDivOpportunity,
-  playEquationVo,
   playLevelUp,
   playLineClear,
   playLock,
@@ -345,7 +344,6 @@ export function useGame() {
 
         explodeId.current += 1
         playBust()
-        playEquationVo(prob)
         setExplosion({ id: explodeId.current, cells: clusterCells })
         setSlowMo(true)
         showFlash('÷ POWER CLEAR! ✨')
