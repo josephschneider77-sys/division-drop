@@ -127,8 +127,8 @@ export function playEquationVo(problem: {
   const answerPath = numberVoPath(problem.answer)
   if (!dividendPath || !divisorPath || !answerPath) return
 
-  // ~70% faster than recorded pace (kid-game snappy).
-  const rate = 1.7
+  // 50% faster than recorded pace (kid-game snappy).
+  const rate = 1.5
   void (async () => {
     await playUrlAsync(dividendPath, 1, rate)
     await playUrlAsync('vo/operators/divided-by.mp3', 1, rate)
