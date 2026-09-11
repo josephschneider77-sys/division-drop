@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { MATH_TIME_MS } from '../game/constants'
 import { formatCorrectAnswer, formatProblem } from '../game/math'
 import type { DivisionProblem } from '../game/types'
-import { playSoftFail } from '../audio/sounds'
+import { playEquationVo } from '../audio/sounds'
 
 interface Props {
   problem: DivisionProblem
@@ -37,7 +37,7 @@ export default function MathModal({
     const equation = formatCorrectAnswer(problem)
     setReveal(equation)
     doneRef.current = true
-    playSoftFail()
+    playEquationVo(problem)
     window.setTimeout(() => {
       const msg =
         reason === 'timeout'
